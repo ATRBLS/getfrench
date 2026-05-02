@@ -5,7 +5,7 @@ const supabase = require('../lib/supabase');
 
 const router = express.Router();
 
-const VOICE_ID = 'kgG7dCoKTkybBDH8UsV7'; // Charlotte — natural French female voice
+const VOICE_ID = 'EXAVITQu4vr4xnSDxMaL'; // Sarah — French multilingual female voice
 
 function cefrToSpeed(level) {
   if (!level) return 1.0;
@@ -47,8 +47,8 @@ router.post('/', requireAuth, async (req, res) => {
         },
         body: JSON.stringify({
           text: text.trim(),
-          model_id: 'eleven_turbo_v2_5',
-          voice_settings: { stability: 0.3, similarity_boost: 0.75 },
+          model_id: 'eleven_multilingual_v2',
+          voice_settings: { stability: 0.5, similarity_boost: 0.75, style: 0.0, use_speaker_boost: true },
           speed,
         }),
       }
