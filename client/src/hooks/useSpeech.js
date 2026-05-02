@@ -43,7 +43,7 @@ export function useSpeechRecognition({ onResult, onEnd, onError }) {
     try { recognitionRef.current?.abort(); } catch {}
 
     const rec = new SR();
-    rec.lang = 'en-US';
+    rec.lang = 'fr-FR';
     rec.interimResults = false;
     rec.maxAlternatives = 1;
     rec.continuous = false;
@@ -169,7 +169,7 @@ export function useSpeechSynthesis() {
         if (gen !== genRef.current || err.message === 'cancelled') return;
         console.error('[TTS] ElevenLabs failed, falling back to Web Speech:', err.message);
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang  = 'en-US';
+        utterance.lang  = 'fr-FR';
         utterance.rate  = 1.1;
         utterance.onend = utterance.onerror = () => playNext(gen);
         window.speechSynthesis.speak(utterance);
