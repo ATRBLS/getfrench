@@ -92,17 +92,18 @@ router.post('/magic-link', async (req, res) => {
     console.log('Attempting to send email to:', email);
 
     const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
-    const link = `${process.env.VITE_APP_URL}/auth/verify?token=${token}`;
+    const frontendUrl = process.env.FRONTEND_URL || process.env.VITE_APP_URL;
+    const link = `${frontendUrl}/auth?token=${token}`;
 
     const { data, error } = await getResend().emails.send({
-      from: 'Speakr <onboarding@resend.dev>',
+      from: 'GetFrench <onboarding@resend.dev>',
       to: email,
-      subject: 'Your Speakr login link',
+      subject: 'Your GetFrench login link',
       html: `
         <div style="font-family:sans-serif;max-width:400px;margin:auto;padding:40px">
-          <h2 style="font-size:24px;margin-bottom:8px">Sign in to Speakr</h2>
+          <h2 style="font-size:24px;margin-bottom:8px">Sign in to GetFrench</h2>
           <p style="color:#666;margin-bottom:32px">Click the button below to sign in. This link expires in 15 minutes.</p>
-          <a href="${link}" style="background:#fff;color:#000;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">Sign in →</a>
+          <a href="${link}" style="background:#0055A4;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;display:inline-block">Sign in →</a>
           <p style="color:#999;margin-top:32px;font-size:13px">If you didn't request this, you can ignore this email.</p>
         </div>
       `,
