@@ -33,6 +33,7 @@ export const api = {
   endSession: (data) => request('/api/sessions/end', { method: 'POST', body: JSON.stringify(data) }),
   summarize: (data) => request('/api/chat/summarize', { method: 'POST', body: JSON.stringify(data) }),
   checkout: (data) => request('/api/stripe/checkout', { method: 'POST', body: JSON.stringify(data) }),
+  stripePortal: () => request('/api/stripe/portal', { method: 'POST' }),
   post: (endpoint, body) => request(`/api${endpoint}`, { method: 'POST', body: JSON.stringify(body) }),
 };
 

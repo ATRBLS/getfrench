@@ -32,6 +32,7 @@ export default function App() {
   const [showCefrTip, setShowCefrTip] = useState(false);
   const cefrTipTimerRef = useRef(null);
   const [error, setError] = useState('');
+  const [portalLoading, setPortalLoading] = useState(false);
   const [messages, setMessages] = useState([]);
   const [lastTranscript, setLastTranscript] = useState('');
   const [aiText, setAiText] = useState('');
@@ -313,6 +314,23 @@ export default function App() {
     ? (sessionCount === 0 ? 'First session' : `Session ${sessionCount + 1}`)
     : '';
 
+  const handleSignOut = () => {
+    clearAuth();
+    navigate('/');
+  };
+
+  const handlePortal = async () => {
+    setPortalLoading(true);
+    try {
+      const { url } = await api.stripePortal();
+      window.location.href = url;
+    } catch (err) {
+      setError('Could not open billing portal. Please try again.');
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
   const handleCefrTap = () => {
     setShowCefrTip(v => !v);
     clearTimeout(cefrTipTimerRef.current);
@@ -326,14 +344,17 @@ export default function App() {
           <Logo size={28} />
           {sessionLabel && <span className="session-count">{sessionLabel}</span>}
         </div>
-        <button className="cefr-badge" onClick={handleCefrTap} aria-label="CEFR level info">
-          ★ {cefrLevel ? `Level ${cefrLevel}` : 'Level ?'}
-          {showCefrTip && (
-            <span className="cefr-tooltip">
-              Your French level — detected after your first session
-            </span>
-          )}
-        </button>
+        <div className="header-right">
+          <button className="cefr-badge" onClick={handleCefrTap} aria-label="CEFR level info">
+            ★ {cefrLevel ? `Level ${cefrLevel}` : 'Level ?'}
+            {showCefrTip && (
+              <span className="cefr-tooltip">
+                Your French level — detected after your first session
+              </span>
+            )}
+          </button>
+          <button className="signout-btn" onClick={handleSignOut}>Sign out</button>
+        </div>
       </div>
 
       <div className="app-center">
@@ -404,6 +425,11 @@ export default function App() {
               <span className="memory-dot" />
               <span className="memory-label">Your coach remembers you</span>
             </span>
+          )}
+          {userData?.plan !== 'free' && userData?.plan && (
+            <button className="portal-link" onClick={handlePortal} disabled={portalLoading}>
+              {portalLoading ? 'Loading…' : 'Manage subscription'}
+            </button>
           )}
         </div>
       </div>

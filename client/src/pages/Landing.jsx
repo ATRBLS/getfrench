@@ -58,7 +58,10 @@ function LNav({ navigate }) {
           <Logo size={34} />
           <span className="l-brand-name">GetFrench</span>
         </div>
-        <button className="l-nav-cta" onClick={() => navigate('/auth')}>Start free</button>
+        <div className="l-nav-actions">
+          <button className="l-nav-signin" onClick={() => navigate('/auth')}>Sign in</button>
+          <button className="l-nav-cta" onClick={() => navigate('/auth')}>Start free →</button>
+        </div>
       </div>
     </nav>
   );

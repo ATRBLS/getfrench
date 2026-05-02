@@ -42,15 +42,15 @@ router.post('/create-checkout', requireAuth, async (req, res) => {
           price_data: {
             currency: 'usd',
             recurring: { interval: pricing.interval },
-            product_data: { name: `Speakr ${PLANS[plan].label}` },
+            product_data: { name: `GetFrench ${PLANS[plan].label}` },
             unit_amount: pricing.amount,
           },
           quantity: 1,
         },
       ],
       mode: 'subscription',
-      success_url: 'https://speakr-two.vercel.app/app?upgraded=true',
-      cancel_url: 'https://speakr-two.vercel.app/app',
+      success_url: `${process.env.FRONTEND_URL}/app?upgraded=true`,
+      cancel_url: `${process.env.FRONTEND_URL}/app`,
       metadata: { user_id: req.user.id, plan },
     });
 
@@ -101,6 +101,25 @@ router.post('/webhook', async (req, res) => {
   }
 
   res.json({ received: true });
+});
+
+// POST /api/stripe/portal
+router.post('/portal', requireAuth, async (req, res) => {
+  try {
+    const customers = await stripe.customers.list({ email: req.user.email, limit: 1 });
+    const customerId = customers.data[0]?.id;
+    if (!customerId) return res.status(404).json({ error: 'No subscription found' });
+
+    const session = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: `${process.env.FRONTEND_URL}/app`,
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('Portal error:', err);
+    res.status(500).json({ error: 'Portal failed' });
+  }
 });
 
 module.exports = router;
