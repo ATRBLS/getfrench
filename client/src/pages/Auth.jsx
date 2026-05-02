@@ -43,24 +43,33 @@ export default function Auth() {
 
     script.onload = () => {
       console.log('[Auth] GSI script loaded, window.google:', !!window.google);
-      if (!window.google) return;
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: async ({ credential }) => {
-          console.log('[Auth] Google credential received, length:', credential?.length);
-          try {
-            const { token: jwt, user } = await api.googleAuth(credential);
-            console.log('[Auth] googleAuth success, user:', user?.email);
-            saveAuth(jwt, user);
-            navigate('/app', { replace: true });
-          } catch (err) {
-            console.error('[Auth] googleAuth failed:', err.status, err.message, err);
-            setError(`Google sign-in failed: ${err.message || 'unknown error'}`);
-          }
-        },
-      });
-      setGoogleReady(true);
-      console.log('[Auth] Google initialized, ready');
+      if (!window.google) {
+        console.error('[Auth] window.google is undefined after script load');
+        return;
+      }
+      try {
+        window.google.accounts.id.initialize({
+          client_id: clientId,
+          callback: async ({ credential }) => {
+            console.log('[Auth] Google credential received, length:', credential?.length);
+            try {
+              const { token: jwt, user } = await api.googleAuth(credential);
+              console.log('[Auth] googleAuth success, user:', user?.email);
+              saveAuth(jwt, user);
+              navigate('/app', { replace: true });
+            } catch (err) {
+              console.error('[Auth] googleAuth failed:', err.status, err.message, err);
+              setError(`Google sign-in failed: ${err.message || 'unknown error'}`);
+            }
+          },
+          auto_select: false,
+          ux_mode: 'popup',
+        });
+        setGoogleReady(true);
+        console.log('[Auth] Google initialized, ready — clientId:', clientId.slice(0, 20) + '…');
+      } catch (err) {
+        console.error('[Auth] google.accounts.id.initialize failed:', err);
+      }
     };
 
     script.onerror = () => {
@@ -71,12 +80,21 @@ export default function Auth() {
   }, [navigate, searchParams]);
 
   const handleGoogle = () => {
-    console.log('[Auth] handleGoogle clicked, window.google:', !!window.google);
-    if (window.google) {
-      window.google.accounts.id.prompt((notification) => {
-        console.log('[Auth] GSI prompt notification:', notification.getMomentType(), notification.getNotDisplayedReason?.(), notification.getSkippedReason?.(), notification.getDismissedReason?.());
-      });
+    console.log('[Auth] handleGoogle clicked, window.google:', !!window.google, '| googleReady:', googleReady);
+    if (!window.google) {
+      setError('Google Sign-In is not available. Please use the magic link below.');
+      return;
     }
+    window.google.accounts.id.prompt((notification) => {
+      const type = notification.getMomentType();
+      const notDisplayed = notification.getNotDisplayedReason?.();
+      const skipped = notification.getSkippedReason?.();
+      const dismissed = notification.getDismissedReason?.();
+      console.log('[Auth] GSI prompt notification — type:', type, '| notDisplayed:', notDisplayed, '| skipped:', skipped, '| dismissed:', dismissed);
+      if (type === 'skipped' || type === 'display_failed') {
+        setError('Google Sign-In was blocked by your browser. Please use the magic link below, or allow third-party cookies for this site.');
+      }
+    });
   };
 
   const handleMagicLink = async (e) => {
