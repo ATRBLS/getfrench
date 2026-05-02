@@ -1,0 +1,122 @@
+.auth-page {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 70% 20%, rgba(245,130,174,0.12) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(139,211,221,0.1) 0%, transparent 50%),
+    var(--background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(24px, env(safe-area-inset-top)) 24px max(24px, env(safe-area-inset-bottom));
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.auth-logo {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--foreground);
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.auth-card h2 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--foreground);
+  text-align: center;
+}
+
+.auth-sub {
+  font-size: 15px;
+  color: var(--muted);
+  text-align: center;
+  margin-top: -8px;
+}
+
+/* Google button: white pill, navy border */
+.google-btn {
+  background: white !important;
+  color: var(--foreground) !important;
+  border: 1.5px solid var(--border) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.divider {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.magic-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.email-input { width: 100%; }
+
+.auth-error {
+  font-size: 14px;
+  color: #e53935;
+  text-align: center;
+}
+
+.no-password {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.auth-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.sent-icon { font-size: 40px; }
+
+.auth-sent h2 { font-size: 22px; }
+
+.sent-sub {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.sent-sub strong {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.link-btn {
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-top: 8px;
+  touch-action: manipulation;
+}

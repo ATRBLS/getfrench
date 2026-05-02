@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- iOS PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="GetFrench" />
+
+    <!-- iOS icons -->
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="msapplication-TileColor" content="#0a0a0a" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/icons/icon-192.png" />
+
+    <!-- SEO -->
+    <meta name="description" content="Your AI French coach. Real conversations. Progress every session." />
+
+    <title>GetFrench</title>
+  </head>
+  <body>
+    <div id="splash" style="
+  position:fixed;
+  inset:0;
+  background:#f0f4ff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  z-index:9999;
+  transition:opacity 0.4s ease;
+">
+  <svg width="72" height="72" viewBox="0 0 80 80"
+       fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="sg" x1="0" y1="80" x2="80" y2="0"
+        gradientUnits="userSpaceOnUse">
+        <stop offset="0%"   stop-color="#0055A4"/>
+        <stop offset="50%"  stop-color="#FFFFFF"/>
+        <stop offset="100%" stop-color="#EF4135"/>
+      </linearGradient>
+    </defs>
+    <path d="M10 18 Q10 8 20 8 L60 8 Q70 8 70 18 L70 46
+             Q70 56 60 56 L48 56 L40 68 L32 56 L20 56
+             Q10 56 10 46 Z" fill="url(#sg)"/>
+    <rect x="22" y="30" width="5" height="10" rx="2.5" fill="white"/>
+    <rect x="31" y="24" width="5" height="22" rx="2.5" fill="white"/>
+    <rect x="40" y="27" width="5" height="16" rx="2.5" fill="white"/>
+    <rect x="49" y="30" width="5" height="10" rx="2.5" fill="white"/>
+  </svg>
+  <span style="
+    color:#0055A4;
+    font-size:24px;
+    font-weight:800;
+    font-family:-apple-system,sans-serif;
+    letter-spacing:-0.03em;
+  ">GetFrench</span>
+  <style>
+    @keyframes splash-pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50% { opacity:0.7; transform:scale(0.94); }
+    }
+    #splash svg {
+      animation: splash-pulse 1.4s ease-in-out infinite;
+    }
+  </style>
+</div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

@@ -1,0 +1,172 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+  padding: 0 0 0 0;
+  backdrop-filter: blur(4px);
+}
+
+@media (min-width: 480px) {
+  .modal-overlay {
+    align-items: center;
+  }
+}
+
+.modal-card {
+  background: #111;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 20px 20px 0 0;
+  padding: 32px 24px 40px;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+@media (min-width: 480px) {
+  .modal-card {
+    border-radius: 20px;
+    padding: 36px 32px;
+  }
+}
+
+.modal-card h2 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.modal-sub {
+  font-size: 15px;
+  color: rgba(255,255,255,0.45);
+  margin-top: -12px;
+}
+
+.billing-toggle {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.billing-toggle button {
+  flex: 1;
+  padding: 8px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.45);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  touch-action: manipulation;
+}
+
+.billing-toggle button.active {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.save-badge {
+  font-size: 11px;
+  color: var(--green);
+  font-weight: 600;
+}
+
+.plans {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.plan-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  background: #1a1a1a;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+
+.plan-row:hover:not(:disabled) {
+  border-color: #444;
+  background: #1a1a1a;
+}
+
+.plan-row--popular {
+  border-color: rgba(255,255,255,0.2);
+}
+
+.plan-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.plan-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.popular-tag {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.plan-hours {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.plan-billed {
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.plan-price {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.plan-period {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.plan-loading {
+  position: absolute;
+  right: 18px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.modal-error {
+  font-size: 13px;
+  color: var(--red);
+  text-align: center;
+  margin-top: -8px;
+}
+
+/* Override global btn-secondary for dark modal background */
+.modal-card .btn-secondary {
+  color: rgba(255,255,255,0.55) !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}

@@ -1,0 +1,153 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --border: #222;
+  --text: #f0f0f0;
+  --text-muted: #666;
+  --text-dim: #999;
+  --accent: #fff;
+  --red: #ff3b30;
+  --green: #30d158;
+
+  /* Safe areas for iPhone notch / home indicator */
+  --sat: env(safe-area-inset-top);
+  --sar: env(safe-area-inset-right);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+}
+
+html {
+  height: 100%;
+  /* Prevent iOS font size adjustment on rotation */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  -webkit-overflow-scrolling: touch;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+#root {
+  height: 100%;
+  /* Extend into notch / home indicator areas */
+  padding-top: env(safe-area-inset-top);
+}
+
+/* For standalone PWA mode: status bar sits inside the viewport */
+@media (display-mode: standalone) {
+  #root {
+    padding-top: 0;
+  }
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  touch-action: manipulation;
+}
+
+input {
+  background-color: white !important;
+  border: 1.5px solid var(--border) !important;
+  color: var(--foreground) !important;
+  border-radius: var(--radius);
+  height: 56px;
+  padding: 0 16px;
+  font-size: 16px !important;
+  width: 100%;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+input::placeholder {
+  color: var(--muted) !important;
+}
+
+input:focus {
+  border-color: var(--primary) !important;
+  background-color: white !important;
+}
+
+/* ── Global button classes ── */
+
+.btn-primary {
+  background: var(--gradient-coral) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50px;
+  height: 56px;
+  padding: 0 32px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: opacity 0.15s, transform 0.1s;
+  touch-action: manipulation;
+  box-shadow: var(--shadow-glow);
+}
+
+.btn-primary:active:not(:disabled) {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-secondary {
+  background-color: transparent !important;
+  color: var(--foreground) !important;
+  border: 1.5px solid var(--border) !important;
+  border-radius: 50px;
+  height: 56px;
+  padding: 0 32px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.15s, opacity 0.15s, transform 0.1s;
+  touch-action: manipulation;
+}
+
+.btn-secondary:active:not(:disabled) {
+  opacity: 0.7;
+  transform: scale(0.98);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
