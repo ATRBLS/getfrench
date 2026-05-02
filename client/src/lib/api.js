@@ -1,7 +1,7 @@
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 function getToken() {
-  return localStorage.getItem('speakr_token');
+  return localStorage.getItem('getfrench_token');
 }
 
 async function request(path, options = {}) {

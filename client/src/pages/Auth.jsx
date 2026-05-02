@@ -54,8 +54,9 @@ export default function Auth() {
             console.log('[Auth] Google credential received, length:', credential?.length);
             try {
               const { token: jwt, user } = await api.googleAuth(credential);
-              console.log('[Auth] googleAuth success, user:', user?.email);
+              console.log('[Auth] googleAuth success, user:', user?.email, '| token length:', jwt?.length);
               saveAuth(jwt, user);
+              console.log('[Auth] saveAuth done, navigating to /app');
               navigate('/app', { replace: true });
             } catch (err) {
               console.error('[Auth] googleAuth failed:', err.status, err.message, err);

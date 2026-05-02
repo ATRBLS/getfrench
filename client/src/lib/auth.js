@@ -1,11 +1,11 @@
 export function saveAuth(token, user) {
-  localStorage.setItem('speakr_token', token);
-  localStorage.setItem('speakr_user', JSON.stringify(user));
+  localStorage.setItem('getfrench_token', token);
+  localStorage.setItem('getfrench_user', JSON.stringify(user));
 }
 
 export function getStoredUser() {
   try {
-    const raw = localStorage.getItem('speakr_user');
+    const raw = localStorage.getItem('getfrench_user');
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -13,12 +13,12 @@ export function getStoredUser() {
 }
 
 export function getToken() {
-  return localStorage.getItem('speakr_token');
+  return localStorage.getItem('getfrench_token');
 }
 
 export function clearAuth() {
-  localStorage.removeItem('speakr_token');
-  localStorage.removeItem('speakr_user');
+  localStorage.removeItem('getfrench_token');
+  localStorage.removeItem('getfrench_user');
 }
 
 export function isAuthenticated() {
