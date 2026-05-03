@@ -274,6 +274,74 @@
   color: #e53935;
 }
 
+/* ─── Feature panel ─── */
+
+.feature-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px 8px;
+  flex-shrink: 0;
+}
+
+.feature-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.feat-pill {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 50px;
+  border: 1.5px solid #0055A4;
+  color: #0055A4;
+  background: white;
+  white-space: nowrap;
+  touch-action: manipulation;
+  transition: background 0.12s, color 0.12s, opacity 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.feat-pill--active {
+  background: var(--gradient-coral);
+  border-color: transparent;
+  color: white;
+}
+
+.feat-pill--soon {
+  position: relative;
+  opacity: 0.35;
+  cursor: not-allowed;
+  border-color: var(--muted);
+  color: var(--muted);
+}
+
+.feat-soon-tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--foreground);
+  color: rgba(255,255,255,0.9);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.feat-pill--soon:hover .feat-soon-tip,
+.feat-pill--soon:focus .feat-soon-tip {
+  display: block;
+}
+
 /* ─── End hint ─── */
 
 .end-hint {

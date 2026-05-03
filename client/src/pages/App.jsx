@@ -33,6 +33,10 @@ export default function App() {
   const cefrTipTimerRef = useRef(null);
   const [error, setError] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
+  const [speed, setSpeed] = useState('normal');
+  const [corrMode, setCorrMode] = useState('gentle');
+  const speedRef = useRef('normal');
+  const corrModeRef = useRef('gentle');
   const [messages, setMessages] = useState([]);
   const [lastTranscript, setLastTranscript] = useState('');
   const [aiText, setAiText] = useState('');
@@ -172,7 +176,7 @@ export default function App() {
     };
 
     try {
-      await streamMessage(newMessages, sessionId, (chunk) => {
+      await streamMessage(newMessages, sessionId, corrModeRef.current, (chunk) => {
         fullResponse += chunk;
         sentenceBuffer += chunk;
         setAiText(fullResponse);
@@ -331,6 +335,18 @@ export default function App() {
     }
   };
 
+  const handleSpeedChange = (newSpeed) => {
+    setSpeed(newSpeed);
+    speedRef.current = newSpeed;
+    const map = { slow: 0.75, normal: 1.0, fast: 1.25 };
+    api.setTtsSpeed(map[newSpeed]).catch(() => {});
+  };
+
+  const handleCorrModeChange = (newMode) => {
+    setCorrMode(newMode);
+    corrModeRef.current = newMode;
+  };
+
   const handleCefrTap = () => {
     setShowCefrTip(v => !v);
     clearTimeout(cefrTipTimerRef.current);
@@ -404,6 +420,52 @@ export default function App() {
 
         {error && <p className="app-error">{error}</p>}
       </div>
+
+      {isSessionActive && (
+        <div className="feature-panel">
+          <div className="feature-row">
+            {[
+              { id: 'slow',   label: 'Slow'   },
+              { id: 'normal', label: 'Normal' },
+              { id: 'fast',   label: 'Fast'   },
+            ].map(({ id, label }) => (
+              <button
+                key={id}
+                className={`feat-pill${speed === id ? ' feat-pill--active' : ''}`}
+                onClick={() => handleSpeedChange(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <div className="feature-row">
+            <button
+              className={`feat-pill${corrMode === 'gentle' ? ' feat-pill--active' : ''}`}
+              onClick={() => handleCorrModeChange('gentle')}
+            >
+              🌸 Gentle
+            </button>
+            <button
+              className={`feat-pill${corrMode === 'strict' ? ' feat-pill--active' : ''}`}
+              onClick={() => handleCorrModeChange('strict')}
+            >
+              ⚡ Strict
+            </button>
+            <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
+              🇫🇷 Paris accent
+              <span className="feat-soon-tip">Coming soon</span>
+            </button>
+            <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
+              🇨🇦 Quebec accent
+              <span className="feat-soon-tip">Coming soon</span>
+            </button>
+            <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
+              📊 Live stats
+              <span className="feat-soon-tip">Coming soon</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {isSessionActive && (
         <p className="end-hint">Tap again to end session</p>

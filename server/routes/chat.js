@@ -6,7 +6,7 @@ const { requireAuth } = require('../middleware/auth');
 const router = express.Router();
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-function buildSystemPrompt(memory) {
+function buildSystemPrompt(memory, corrMode) {
   const cefrLevel = memory?.cefr_level || 'A1';
 
   let cefrGuidance;
@@ -29,7 +29,10 @@ Rules:
 - Never use emojis in your responses. Write plain text only.
 - Ask only one question at a time. Always move the conversation forward.
 - Adapt vocabulary and pace to the user's CEFR level.
-- Correct only serious errors that block comprehension — model the correct form naturally in your reply without explicitly calling it out.
+- Correction mode: ${corrMode === 'strict'
+    ? 'STRICT — correct ALL grammar mistakes explicitly. Point out the error and give the correct form in your reply.'
+    : 'GENTLE — only correct very serious errors that block comprehension. Model the correct form naturally; never explicitly call out minor mistakes.'
+  }
 - Celebrate progress warmly and personally.
 - Topics: daily life, work, family, culture, Canadian life, hockey, maple syrup (with warmth and humour).
 - Remember everything from previous sessions and use that context naturally.
@@ -57,7 +60,7 @@ Never ask more than one question at a time.`;
 // Stream chat response
 router.post('/message', requireAuth, async (req, res) => {
   try {
-    const { messages, session_id } = req.body;
+    const { messages, session_id, corrMode } = req.body;
 
     const { data: user } = await supabase
       .from('users')
@@ -65,7 +68,7 @@ router.post('/message', requireAuth, async (req, res) => {
       .eq('id', req.user.id)
       .single();
 
-    const systemPrompt = buildSystemPrompt(user?.memory);
+    const systemPrompt = buildSystemPrompt(user?.memory, corrMode || 'gentle');
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
