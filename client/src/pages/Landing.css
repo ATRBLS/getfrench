@@ -702,4 +702,44 @@
   border-top: 1px solid var(--border);
   font-size: 14px;
   color: var(--muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }
+
+.l-footer-link {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+.l-footer-link:hover { opacity: 1; }
+
+/* ─── STORY SECTION ─── */
+
+.l-story-section {
+  background: white;
+}
+
+.l-story-preview {
+  font-size: 17px;
+  color: var(--muted);
+  max-width: 560px;
+  margin: 0 auto 24px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.l-story-link {
+  display: inline-block;
+  color: #0055A4;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.15s;
+}
+.l-story-link:hover { opacity: 0.75; }

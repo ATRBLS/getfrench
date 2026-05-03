@@ -1,0 +1,99 @@
+.st-page {
+  min-height: 100dvh;
+  background: #f0f4ff;
+  color: #001858;
+}
+
+/* ─── Nav ─── */
+
+.st-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.st-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: transparent;
+  font-weight: 800;
+  font-size: 17px;
+  color: #001858;
+  letter-spacing: -0.02em;
+  touch-action: manipulation;
+}
+
+.st-back {
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(0,24,88,0.5);
+  transition: color 0.15s;
+  touch-action: manipulation;
+}
+.st-back:active { color: #001858; }
+
+/* ─── Content ─── */
+
+.st-content {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 16px 24px 80px;
+}
+
+.st-content h1 {
+  font-size: clamp(32px, 7vw, 44px);
+  font-weight: 800;
+  color: #001858;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  margin-bottom: 36px;
+}
+
+.st-content p {
+  font-size: 18px;
+  line-height: 1.75;
+  color: rgba(0,24,88,0.82);
+  margin-bottom: 24px;
+}
+
+.st-content blockquote {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0055A4;
+  border-left: 4px solid #0055A4;
+  padding: 4px 0 4px 24px;
+  margin: 40px 0;
+  line-height: 1.45;
+}
+
+.st-signature {
+  font-style: italic;
+  color: rgba(0,24,88,0.45) !important;
+  margin-top: 48px !important;
+  font-size: 16px !important;
+}
+
+/* ─── CTA ─── */
+
+.st-cta {
+  margin-top: 56px;
+}
+
+.st-cta-btn {
+  background: var(--primary, #f582ae);
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 17px 40px;
+  border-radius: 50px;
+  box-shadow: 0 6px 24px rgba(245,130,174,0.38);
+  transition: transform 0.1s, opacity 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.st-cta-btn:active { transform: scale(0.97); }

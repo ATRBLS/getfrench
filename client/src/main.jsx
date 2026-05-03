@@ -7,6 +7,7 @@ import Landing from './pages/Landing';
 import Auth from './pages/Auth';
 import AppPage from './pages/App';
 import Onboarding from './pages/Onboarding';
+import Story from './pages/Story';
 import InstallBanner from './components/InstallBanner';
 import { isAuthenticated } from './lib/auth';
 
@@ -27,6 +28,7 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/onboarding" element={<Onboarding />} />
+        <Route path="/story" element={<Story />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/auth/verify" element={<Auth />} />
         <Route path="/app" element={

@@ -43,6 +43,7 @@ export default function Landing() {
       <LPain />
       <LHow />
       <LTestimonials />
+      <LStory />
       <LPricing navigate={navigate} yearly={yearly} setYearly={setYearly} />
       <LInstall />
       <LFooter />
@@ -188,6 +189,24 @@ function LHow() {
   );
 }
 
+function LStory() {
+  return (
+    <section className="l-section l-story-section">
+      <div className="l-section-inner">
+        <p className="l-eyebrow">Our story</p>
+        <h2>Built by someone who knows exactly how you feel.</h2>
+        <p className="l-story-preview">
+          I moved to Toronto in April 2025. My English was decent on paper.
+          But in real conversations, I froze. Then I watched my kids learn English
+          at school in months, without a single grammar rule. Just by speaking,
+          fearlessly. That changed everything.
+        </p>
+        <a href="/story" className="l-story-link">Read the full story →</a>
+      </div>
+    </section>
+  );
+}
+
 function LTestimonials() {
   return (
     <section className="l-section">
@@ -296,6 +315,7 @@ function LFooter() {
   return (
     <footer className="l-footer">
       <p>GetFrench &mdash; Speak French without the fear</p>
+      <a href="/story" className="l-footer-link">Our story</a>
     </footer>
   );
 }
