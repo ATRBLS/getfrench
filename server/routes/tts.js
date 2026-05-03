@@ -7,10 +7,6 @@ const router = express.Router();
 
 const VOICE_ID = 'EXAVITQu4vr4xnSDxMaL'; // Sarah — French multilingual female voice
 
-// Per-user speed override set by the client toggle (in-memory, resets on restart).
-// Keys: user id  Values: 0.75 | 1.0 | 1.25
-const speedPrefs = new Map();
-
 function cefrToSpeed(level) {
   if (!level) return 1.0;
   const l = level.toUpperCase();
@@ -19,13 +15,31 @@ function cefrToSpeed(level) {
   return 1.0; // B1/B2
 }
 
-// POST /api/tts/set-speed — store user's manual speed preference
-router.post('/set-speed', requireAuth, (req, res) => {
+// POST /api/tts/set-speed — persist user's speed preference in Supabase
+router.post('/set-speed', requireAuth, async (req, res) => {
   const { speed } = req.body;
   const valid = [0.75, 1.0, 1.25];
   if (!valid.includes(speed)) return res.status(400).json({ error: 'speed must be 0.75, 1.0, or 1.25' });
-  speedPrefs.set(req.user.id, speed);
-  res.json({ ok: true });
+
+  try {
+    const { data: userData } = await supabase
+      .from('users')
+      .select('memory')
+      .eq('id', req.user.id)
+      .single();
+
+    const updatedMemory = { ...(userData?.memory || {}), tts_speed: speed };
+    await supabase
+      .from('users')
+      .update({ memory: updatedMemory })
+      .eq('id', req.user.id);
+
+    console.log('[TTS] speed saved to Supabase for user', req.user.id, '→', speed);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[TTS] set-speed error:', err.message);
+    res.status(500).json({ error: 'Failed to save speed preference' });
+  }
 });
 
 router.post('/', requireAuth, async (req, res) => {
@@ -35,19 +49,18 @@ router.post('/', requireAuth, async (req, res) => {
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'ELEVENLABS_API_KEY not set' });
 
-  // Manual override takes priority; fall back to CEFR-adaptive speed
-  let speed = speedPrefs.get(req.user.id) ?? null;
-  if (speed === null) {
-    try {
-      const { data: user } = await supabase
-        .from('users')
-        .select('cefr_level')
-        .eq('id', req.user.id)
-        .single();
-      speed = cefrToSpeed(user?.cefr_level);
-    } catch {
-      speed = 1.0;
-    }
+  // Read speed preference from Supabase (persistent across restarts)
+  // tts_speed in memory takes priority; falls back to CEFR-adaptive speed
+  let speed = 1.0;
+  try {
+    const { data: user } = await supabase
+      .from('users')
+      .select('cefr_level, memory')
+      .eq('id', req.user.id)
+      .single();
+    speed = user?.memory?.tts_speed ?? cefrToSpeed(user?.cefr_level);
+  } catch {
+    speed = 1.0;
   }
 
   console.log('[TTS] text length:', text.trim().length, '| preview:', text.trim().slice(0, 40), '| speed:', speed);

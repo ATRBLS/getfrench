@@ -422,47 +422,62 @@ export default function App() {
       </div>
 
       <div className={`feature-panel${isSessionActive ? '' : ' feature-panel--idle'}`}>
-        <div className="feature-row">
-          {[
-            { id: 'slow',   label: 'Slow'   },
-            { id: 'normal', label: 'Normal' },
-            { id: 'fast',   label: 'Fast'   },
-          ].map(({ id, label }) => (
+
+        <div className="feat-category">
+          <span className="feat-category-label">Rythme</span>
+          <div className="feature-row">
+            {[
+              { id: 'slow',   label: 'Lent'   },
+              { id: 'normal', label: 'Normal' },
+              { id: 'fast',   label: 'Rapide' },
+            ].map(({ id, label }) => (
+              <button
+                key={id}
+                className={`feat-pill${speed === id ? ' feat-pill--active' : ''}`}
+                onClick={() => handleSpeedChange(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="feat-category">
+          <span className="feat-category-label">Ton</span>
+          <div className="feature-row">
             <button
-              key={id}
-              className={`feat-pill${speed === id ? ' feat-pill--active' : ''}`}
-              onClick={() => handleSpeedChange(id)}
+              className={`feat-pill${corrMode === 'gentle' ? ' feat-pill--active' : ''}`}
+              onClick={() => handleCorrModeChange('gentle')}
             >
-              {label}
+              🌸 Doux
             </button>
-          ))}
+            <button
+              className={`feat-pill${corrMode === 'strict' ? ' feat-pill--active' : ''}`}
+              onClick={() => handleCorrModeChange('strict')}
+            >
+              ⚡ Strict
+            </button>
+          </div>
         </div>
-        <div className="feature-row">
-          <button
-            className={`feat-pill${corrMode === 'gentle' ? ' feat-pill--active' : ''}`}
-            onClick={() => handleCorrModeChange('gentle')}
-          >
-            🌸 Gentle
-          </button>
-          <button
-            className={`feat-pill${corrMode === 'strict' ? ' feat-pill--active' : ''}`}
-            onClick={() => handleCorrModeChange('strict')}
-          >
-            ⚡ Strict
-          </button>
-          <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
-            🇫🇷 Paris accent
-            <span className="feat-soon-tip">Coming soon</span>
-          </button>
-          <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
-            🇨🇦 Quebec accent
-            <span className="feat-soon-tip">Coming soon</span>
-          </button>
-          <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
-            📊 Live stats
-            <span className="feat-soon-tip">Coming soon</span>
-          </button>
+
+        <div className="feat-category">
+          <span className="feat-category-label">Accent</span>
+          <div className="feature-row">
+            <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
+              🇫🇷 Paris
+              <span className="feat-soon-tip">Bientôt</span>
+            </button>
+            <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
+              🇨🇦 Québec
+              <span className="feat-soon-tip">Bientôt</span>
+            </button>
+            <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
+              📊 Stats live
+              <span className="feat-soon-tip">Bientôt</span>
+            </button>
+          </div>
         </div>
+
       </div>
 
       {isSessionActive && (
