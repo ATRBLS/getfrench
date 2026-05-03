@@ -338,7 +338,7 @@ export default function App() {
   const handleSpeedChange = (newSpeed) => {
     setSpeed(newSpeed);
     speedRef.current = newSpeed;
-    const map = { slow: 0.75, normal: 1.0, fast: 1.25 };
+    const map = { slow: 0.7, normal: 1.0, fast: 1.3 };
     api.setTtsSpeed(map[newSpeed]).catch(() => {});
   };
 
@@ -424,12 +424,12 @@ export default function App() {
       <div className={`feature-panel${isSessionActive ? '' : ' feature-panel--idle'}`}>
 
         <div className="feat-category">
-          <span className="feat-category-label">Rythme</span>
+          <span className="feat-category-label">Speed</span>
           <div className="feature-row">
             {[
-              { id: 'slow',   label: 'Lent'   },
+              { id: 'slow',   label: 'Slow'   },
               { id: 'normal', label: 'Normal' },
-              { id: 'fast',   label: 'Rapide' },
+              { id: 'fast',   label: 'Fast'   },
             ].map(({ id, label }) => (
               <button
                 key={id}
@@ -443,13 +443,13 @@ export default function App() {
         </div>
 
         <div className="feat-category">
-          <span className="feat-category-label">Ton</span>
+          <span className="feat-category-label">Corrections</span>
           <div className="feature-row">
             <button
               className={`feat-pill${corrMode === 'gentle' ? ' feat-pill--active' : ''}`}
               onClick={() => handleCorrModeChange('gentle')}
             >
-              🌸 Doux
+              🌸 Gentle
             </button>
             <button
               className={`feat-pill${corrMode === 'strict' ? ' feat-pill--active' : ''}`}
@@ -465,15 +465,15 @@ export default function App() {
           <div className="feature-row">
             <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
               🇫🇷 Paris
-              <span className="feat-soon-tip">Bientôt</span>
+              <span className="feat-soon-tip">Coming soon</span>
             </button>
             <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
-              🇨🇦 Québec
-              <span className="feat-soon-tip">Bientôt</span>
+              🇨🇦 Quebec
+              <span className="feat-soon-tip">Coming soon</span>
             </button>
             <button className="feat-pill feat-pill--soon" aria-disabled="true" onClick={() => {}}>
-              📊 Stats live
-              <span className="feat-soon-tip">Bientôt</span>
+              📊 Live stats
+              <span className="feat-soon-tip">Coming soon</span>
             </button>
           </div>
         </div>
