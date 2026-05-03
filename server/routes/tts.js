@@ -21,8 +21,8 @@ function cefrToSpeed(level) {
 // POST /api/tts/set-speed
 router.post('/set-speed', requireAuth, async (req, res) => {
   const { speed } = req.body;
-  const valid = [0.7, 1.0, 1.3];
-  if (!valid.includes(speed)) return res.status(400).json({ error: 'speed must be 0.7, 1.0, or 1.3' });
+  const valid = [0.7, 1.0, 1.2];
+  if (!valid.includes(speed)) return res.status(400).json({ error: 'speed must be 0.7, 1.0, or 1.2' });
 
   // Update cache immediately
   speedCache.set(req.user.id, speed);
@@ -87,8 +87,9 @@ router.post('/', requireAuth, async (req, res) => {
         },
         body: JSON.stringify({
           text: text.trim(),
-          model_id: 'eleven_turbo_v2_5',
-          voice_settings: { stability: 0.4, similarity_boost: 0.8 },
+          model_id: 'eleven_multilingual_v2',
+          voice_settings: { stability: 0.5, similarity_boost: 0.8, style: 0.0, use_speaker_boost: true },
+          speed,
         }),
       }
     );

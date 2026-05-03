@@ -286,9 +286,6 @@
   transition: opacity 0.2s;
 }
 
-.feature-panel--idle {
-  opacity: 0.45;
-}
 
 .feat-category {
   display: flex;
