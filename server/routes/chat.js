@@ -6,8 +6,10 @@ const { requireAuth } = require('../middleware/auth');
 const router = express.Router();
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-function buildSystemPrompt(memory, corrMode) {
-  const cefrLevel = memory?.cefr_level || 'A1';
+function buildSystemPrompt(memory, corrMode, levelOverride) {
+  const cefrLevel = (levelOverride && levelOverride !== 'auto')
+    ? levelOverride
+    : (memory?.cefr_level || 'A1');
 
   let cefrGuidance;
   if (cefrLevel === 'A1' || cefrLevel === 'A2') {
@@ -30,8 +32,8 @@ Rules:
 - Ask only one question at a time. Always move the conversation forward.
 - Adapt vocabulary and pace to the user's CEFR level.
 - Correction style: ${corrMode === 'strict'
-    ? 'STRICT. If the user made ANY grammar or vocabulary mistake, START your response with the correction before anything else. Format: "→ [what they said] = [correct form]." Then continue the conversation normally. Example: "→ \'j\'ai manger\' = \'j\'ai mangé\'. Bravo pour l\'effort! Alors, ..." Be thorough — correct every mistake you notice.'
-    : 'GENTLE. Only correct mistakes that block comprehension. Never start with a correction. Silently weave the correct form into your own sentences. Never say "you made a mistake" or draw attention to errors.'
+    ? 'STRICT. If the user made any grammar or vocabulary error, your response must BEGIN with the correction in plain spoken French before anything else. Use this format: "Petite correction — vous avez dit [mistake], on dit [correct form]." Then continue the conversation on a new sentence. Correct every mistake you notice. Use only standard letters and punctuation, no special symbols.'
+    : 'GENTLE. Only correct mistakes that block comprehension. Never open with a correction. Silently weave the correct form into your own sentences without drawing attention to the error.'
   }
 - Celebrate progress warmly and personally.
 - Topics: daily life, work, family, culture, Canadian life, hockey, maple syrup (with warmth and humour).
@@ -60,7 +62,7 @@ Never ask more than one question at a time.`;
 // Stream chat response
 router.post('/message', requireAuth, async (req, res) => {
   try {
-    const { messages, session_id, corrMode } = req.body;
+    const { messages, session_id, corrMode, levelOverride } = req.body;
 
     const { data: user } = await supabase
       .from('users')
@@ -68,7 +70,7 @@ router.post('/message', requireAuth, async (req, res) => {
       .eq('id', req.user.id)
       .single();
 
-    const systemPrompt = buildSystemPrompt(user?.memory, corrMode || 'gentle');
+    const systemPrompt = buildSystemPrompt(user?.memory, corrMode || 'gentle', levelOverride);
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');

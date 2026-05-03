@@ -35,8 +35,10 @@ export default function App() {
   const [portalLoading, setPortalLoading] = useState(false);
   const [speed, setSpeed] = useState('normal');
   const [corrMode, setCorrMode] = useState('gentle');
+  const [levelMode, setLevelMode] = useState('auto');
   const speedRef = useRef('normal');
   const corrModeRef = useRef('gentle');
+  const levelModeRef = useRef('auto');
   const [messages, setMessages] = useState([]);
   const [lastTranscript, setLastTranscript] = useState('');
   const [aiText, setAiText] = useState('');
@@ -50,6 +52,24 @@ export default function App() {
   const sttDebounceRef = useRef(null);      // 2s silence timer before triggering AI
 
   const { enqueueSentence, finalize, cancel: cancelSpeech, createAudioSession, closeAudioSession } = useSpeechSynthesis();
+
+  // Patch AudioBufferSourceNode.prototype.start so playbackRate is applied
+  // before every audio source starts — lets us control speed client-side
+  // without touching useSpeech.js.
+  useEffect(() => {
+    window.__gfPlaybackRate = 1.0;
+    const orig = AudioBufferSourceNode.prototype.start;
+    AudioBufferSourceNode.prototype.start = function (...args) {
+      if (window.__gfPlaybackRate !== 1.0) {
+        this.playbackRate.value = window.__gfPlaybackRate;
+      }
+      return orig.apply(this, args);
+    };
+    return () => {
+      AudioBufferSourceNode.prototype.start = orig;
+      delete window.__gfPlaybackRate;
+    };
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -176,7 +196,7 @@ export default function App() {
     };
 
     try {
-      await streamMessage(newMessages, sessionId, corrModeRef.current, (chunk) => {
+      await streamMessage(newMessages, sessionId, corrModeRef.current, levelModeRef.current, (chunk) => {
         fullResponse += chunk;
         sentenceBuffer += chunk;
         setAiText(fullResponse);
@@ -338,8 +358,13 @@ export default function App() {
   const handleSpeedChange = (newSpeed) => {
     setSpeed(newSpeed);
     speedRef.current = newSpeed;
-    const map = { slow: 0.7, normal: 1.0, fast: 1.3 };
-    api.setTtsSpeed(map[newSpeed]).catch(() => {});
+    const map = { slow: 0.7, normal: 1.0, fast: 1.4 };
+    window.__gfPlaybackRate = map[newSpeed];
+  };
+
+  const handleLevelChange = (newLevel) => {
+    setLevelMode(newLevel);
+    levelModeRef.current = newLevel;
   };
 
   const handleCorrModeChange = (newMode) => {
@@ -457,6 +482,21 @@ export default function App() {
             >
               ⚡ Strict
             </button>
+          </div>
+        </div>
+
+        <div className="feat-category">
+          <span className="feat-category-label">Level</span>
+          <div className="feature-row">
+            {['auto', 'A1', 'A2', 'B1', 'B2', 'C1', 'C2'].map(lvl => (
+              <button
+                key={lvl}
+                className={`feat-pill${levelMode === lvl ? ' feat-pill--active' : ''}`}
+                onClick={() => handleLevelChange(lvl)}
+              >
+                {lvl === 'auto' ? 'Auto' : lvl}
+              </button>
+            ))}
           </div>
         </div>
 

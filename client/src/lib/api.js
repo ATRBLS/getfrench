@@ -38,7 +38,7 @@ export const api = {
   post: (endpoint, body) => request(`/api${endpoint}`, { method: 'POST', body: JSON.stringify(body) }),
 };
 
-export async function streamMessage(messages, session_id, corrMode, onChunk) {
+export async function streamMessage(messages, session_id, corrMode, levelOverride, onChunk) {
   const token = getToken();
   const res = await fetch(`${BASE}/api/chat/message`, {
     method: 'POST',
@@ -46,7 +46,7 @@ export async function streamMessage(messages, session_id, corrMode, onChunk) {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ messages, session_id, corrMode }),
+    body: JSON.stringify({ messages, session_id, corrMode, levelOverride }),
   });
 
   if (!res.ok) throw new Error('Chat failed');
