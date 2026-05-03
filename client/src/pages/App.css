@@ -283,6 +283,11 @@
   gap: 8px;
   padding: 0 16px 8px;
   flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.feature-panel--idle {
+  opacity: 0.45;
 }
 
 .feature-row {
