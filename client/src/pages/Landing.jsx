@@ -59,8 +59,8 @@ function LNav({ navigate }) {
           <span className="l-brand-name">GetFrench</span>
         </div>
         <div className="l-nav-actions">
-          <button className="l-nav-signin" onClick={() => navigate('/auth')}>Sign in</button>
-          <button className="l-nav-cta" onClick={() => navigate('/auth')}>Start free →</button>
+          <button className="l-nav-signin" onClick={() => navigate('/onboarding')}>Sign in</button>
+          <button className="l-nav-cta" onClick={() => navigate('/onboarding')}>Start free →</button>
         </div>
       </div>
     </nav>
@@ -86,7 +86,7 @@ function LHero({ navigate }) {
           GetFrench gives you a space to speak, stumble, and improve — with zero judgment.
         </p>
         <div className="l-hero-actions">
-          <button className="l-btn-coral" onClick={() => navigate('/auth')}>Speak for free →</button>
+          <button className="l-btn-coral" onClick={() => navigate('/onboarding')}>Speak for free →</button>
           <button className="l-btn-ghost" onClick={scrollToPain}>Why it works</button>
         </div>
         <p className="l-fine">3 free sessions · No credit card</p>
@@ -250,7 +250,7 @@ function LPricing({ navigate, yearly, setYearly }) {
               </p>
               <button
                 className={plan.popular ? 'l-btn-coral' : 'l-btn-outline'}
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/onboarding')}
               >
                 {plan.monthly === 0 ? 'Start free' : 'Get started'}
               </button>
