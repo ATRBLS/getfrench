@@ -4,8 +4,8 @@
   "description": "Your AI French coach. Real conversations. Progress every session.",
   "start_url": "/app",
   "display": "standalone",
-  "background_color": "#0a0a0a",
-  "theme_color": "#0a0a0a",
+  "background_color": "#f0f4ff",
+  "theme_color": "#0055A4",
   "orientation": "portrait",
   "icons": [
     {
