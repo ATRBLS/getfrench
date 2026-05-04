@@ -60,7 +60,7 @@ function LNav({ navigate }) {
           <span className="l-brand-name">GetFrench</span>
         </div>
         <div className="l-nav-actions">
-          <button className="l-nav-signin" onClick={() => navigate('/onboarding')}>Sign in</button>
+          <button className="l-nav-signin" onClick={() => navigate('/auth')}>Sign in</button>
           <button className="l-nav-cta" onClick={() => navigate('/onboarding')}>Start free →</button>
         </div>
       </div>

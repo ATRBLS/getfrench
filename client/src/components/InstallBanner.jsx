@@ -16,7 +16,7 @@ export default function InstallBanner() {
     // Only show on iOS Safari, not already installed, not dismissed
     if (!isIOS()) return;
     if (isInStandaloneMode()) return;
-    if (localStorage.getItem('speakr_install_dismissed')) return;
+    if (localStorage.getItem('getfrench_install_dismissed')) return;
 
     // Show after a 3s delay so it doesn't interrupt first load
     const t = setTimeout(() => setVisible(true), 3000);
@@ -27,13 +27,13 @@ export default function InstallBanner() {
 
   const dismiss = () => {
     setVisible(false);
-    localStorage.setItem('speakr_install_dismissed', '1');
+    localStorage.setItem('getfrench_install_dismissed', '1');
   };
 
   return (
     <div className="install-banner">
       <div className="install-banner__content">
-        <img src="/icons/icon-120.png" alt="Speakr" className="install-banner__icon" />
+        <img src="/icons/icon-120.png" alt="GetFrench" className="install-banner__icon" />
         <div className="install-banner__text">
           <strong>Add to Home Screen</strong>
           <span>
