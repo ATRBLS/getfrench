@@ -6,7 +6,7 @@ const { requireAuth } = require('../middleware/auth');
 const router = express.Router();
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-function buildSystemPrompt(memory, corrMode, levelOverride) {
+function buildSystemPrompt(memory, corrMode, levelOverride, crosstalk, helpMode) {
   const isAuto = !levelOverride || levelOverride === 'auto';
   const knownCefr = memory?.cefr_level || null;
   const cefrLevel = isAuto ? knownCefr : levelOverride;
@@ -98,29 +98,29 @@ Your default language is French. But you can switch to English when the user gen
 - Never use emojis. Plain text and standard punctuation only.
 
 ════ LANGUAGE RULES ════
-You operate in two modes depending on what the user says:
+${crosstalk
+  ? `CROSSTALK MODE ACTIVE.
+The user will speak in English — this is intentional, they are a beginner.
+ALWAYS reply in French only. Never switch to English.
+Keep your French simple and clear. You may optionally add key words in English
+in parentheses to help them understand: "Bonjour (Hello)! Comment ça va (How are you)?"
+Encourage them to try French words even one at a time.`
+  : `You operate in two modes:
 
 1. FRENCH CONVERSATION (default)
-   The user is speaking or attempting to speak French → always reply in French.
-   This is the practice mode — stay in French, adapt to their level.
+   The user speaks or attempts French → always reply in French.
 
-2. ENGLISH HELP MODE (when they need it)
-   Switch to English ONLY when the user:
-   - Asks a direct question about French ("How do you say X?", "What does Y mean?",
-     "I don't understand", "Can you explain Z?")
-   - Is a clear beginner who is stuck and can't express themselves in French at all
-   - Asks for a translation or grammar explanation
-   In these cases: answer clearly in English, then IMMEDIATELY give the French version
-   or example so they can hear/see it. Keep it short. End with a simple French question
-   to bring them back into conversation mode.
+2. ENGLISH HELP MODE${helpMode ? ' (CURRENTLY ON — the user has enabled this)' : ' (when genuinely needed)'}
+   ${helpMode
+     ? 'The user has turned on English help. When they ask ANY question in English about French, answer in English clearly, then give the French version. End with a French question to return to practice.'
+     : 'Switch to English ONLY when the user asks a direct question about French (how do I say X, what does Y mean, I don\'t understand). Answer in English, give the French version immediately, then return to French.'}
 
-   Example: User asks "How do you say 'I am hungry'?"
-   → "In French you say 'J'ai faim' — literally 'I have hunger'. Try it:
-      Est-ce que vous avez faim en ce moment?"
+   Example: "How do you say 'I am hungry'?"
+   → "In French: 'J'ai faim'. Try it: Est-ce que vous avez faim en ce moment?"
 
-3. NEVER switch to English just because the user wrote in English for no reason.
-   If they chat casually in English, reply in French gently:
+3. Casual English (not a question) → reply warmly in French:
    "Essayez en français! Je suis là pour vous aider."
+`}
 
 ════ CORRECTION ════
 ${corrMode === 'strict'
@@ -190,7 +190,7 @@ These settings were chosen by the user and must be respected in your VERY NEXT r
 // Stream chat response
 router.post('/message', requireAuth, async (req, res) => {
   try {
-    const { messages, session_id, corrMode, levelOverride } = req.body;
+    const { messages, session_id, corrMode, levelOverride, crosstalk, helpMode } = req.body;
 
     const { data: user } = await supabase
       .from('users')
@@ -198,7 +198,7 @@ router.post('/message', requireAuth, async (req, res) => {
       .eq('id', req.user.id)
       .single();
 
-    const systemPrompt = buildSystemPrompt(user?.memory, corrMode || 'gentle', levelOverride);
+    const systemPrompt = buildSystemPrompt(user?.memory, corrMode || 'gentle', levelOverride, !!crosstalk, !!helpMode);
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');

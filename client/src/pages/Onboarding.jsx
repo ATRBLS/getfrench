@@ -210,7 +210,17 @@ function S8({ next, set }) {
           'B2 — Fairly fluent but not confident',
           'C1 — Advanced, want to perfect it',
         ]}
-        onSelect={v => { set('level', v.split(' ')[0]); next(); }}
+        onSelect={v => {
+          const level = v.split(' ')[0];
+          set('level', level);
+          localStorage.setItem('getfrench_level', level);
+          // A1 beginners get crosstalk on by default so they can speak English
+          if (level === 'A1') {
+            localStorage.setItem('getfrench_crosstalk', 'true');
+            localStorage.setItem('getfrench_helpmode', 'true');
+          }
+          next();
+        }}
       />
     </div>
   );
