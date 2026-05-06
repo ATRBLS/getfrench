@@ -131,11 +131,38 @@ When time is running out (5 min left): "On approche de la fin — continuez comm
 At session 3 of free plan: "C'est votre dernière session gratuite ce mois-ci — vous faites de vrais progrès!"`;
 
   // ── Append memory if available ────────────────────────────────────
+  let prompt = base;
+
   if (!isFirstSession && memory && Object.keys(memory).length > 0) {
-    return base + `\n\n════ WHAT YOU KNOW ABOUT THIS USER ════\n${JSON.stringify(memory, null, 2)}\n\nUse this context. Don't re-ask what you already know. Build on the relationship.`;
+    prompt += `\n\n════ WHAT YOU KNOW ABOUT THIS USER ════\n${JSON.stringify(memory, null, 2)}\n\nUse this context. Don't re-ask what you already know. Build on the relationship.`;
   }
 
-  return base;
+  // ── Active settings override — placed last so it always wins ──────
+  // This block overrides conversation history and context. The user
+  // may have changed these settings mid-session.
+  const levelLabel = cefrLevel || (isAuto ? 'auto-calibrating' : 'B1');
+  const levelRulesShort = {
+    A1: 'MAX 6 WORDS PER SENTENCE. Present tense only. 300 most common words. Yes/no questions only.',
+    A2: 'MAX 10 WORDS PER SENTENCE. Present + passé composé + futur proche only. Simple vocabulary.',
+    B1: 'Natural pace. Mix tenses. Medium vocabulary. Open questions.',
+    B2: 'Rich vocabulary. Varied structures. Conditional + subjunctive welcome. Idiomatic expressions.',
+    C1: 'Full grammatical range. Sophisticated vocabulary. Quebec expressions. Complex ideas.',
+    C2: 'Native-level complexity. All registers. Full idiomatic richness. Push the user hard.',
+  };
+  const activeLevel = cefrLevel && levelRulesShort[cefrLevel]
+    ? `LEVEL: ${cefrLevel} — ${levelRulesShort[cefrLevel]}`
+    : `LEVEL: Calibrating automatically from user responses.`;
+
+  const activeCorrection = corrMode === 'strict'
+    ? `CORRECTION: STRICT — Begin your response with a correction if the user made ANY mistake. Format: "Petite correction — vous avez dit [X], on dit [Y]." Then continue. Correct EVERYTHING.`
+    : `CORRECTION: GENTLE — Never open with a correction. Silently model the correct form in your own sentences only.`;
+
+  prompt += `\n\n════ ACTIVE SETTINGS (OVERRIDE EVERYTHING ABOVE IF NEEDED) ════
+${activeLevel}
+${activeCorrection}
+These settings were chosen by the user and must be respected in your VERY NEXT response, regardless of the conversation history.`;
+
+  return prompt;
 }
 
 // Stream chat response

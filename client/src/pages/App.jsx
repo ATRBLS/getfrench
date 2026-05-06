@@ -53,6 +53,19 @@ export default function App() {
 
   const { enqueueSentence, finalize, cancel: cancelSpeech, createAudioSession, closeAudioSession } = useSpeechSynthesis();
 
+  // Client-side speed control via AudioBufferSourceNode.playbackRate.
+  // This is the only reliable way to change playback speed — ElevenLabs' own
+  // speed param has a negligible effect in practice.
+  useEffect(() => {
+    window.__gfSpeed = 1.0;
+    const orig = AudioBufferSourceNode.prototype.start;
+    AudioBufferSourceNode.prototype.start = function (...args) {
+      if (window.__gfSpeed !== 1.0) this.playbackRate.value = window.__gfSpeed;
+      return orig.apply(this, args);
+    };
+    return () => { AudioBufferSourceNode.prototype.start = orig; delete window.__gfSpeed; };
+  }, []);
+
   useEffect(() => {
     if (!isAuthenticated()) {
       navigate('/auth', { replace: true });
@@ -340,8 +353,8 @@ export default function App() {
   const handleSpeedChange = (newSpeed) => {
     setSpeed(newSpeed);
     speedRef.current = newSpeed;
-    const map = { slow: 0.7, normal: 1.0, fast: 1.2 };
-    api.setTtsSpeed(map[newSpeed]).catch(() => {});
+    const map = { slow: 0.72, normal: 1.0, fast: 1.35 };
+    window.__gfSpeed = map[newSpeed];
   };
 
   const handleLevelChange = (newLevel) => {
