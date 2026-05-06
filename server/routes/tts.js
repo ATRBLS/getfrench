@@ -5,7 +5,7 @@ const supabase = require('../lib/supabase');
 
 const router = express.Router();
 
-const VOICE_ID = 'EXAVITQu4vr4xnSDxMaL'; // Sarah
+const VOICE_ID = 'txtf1EDouKke753vN8SL'; // Jeanne — Parisian French female narrator
 
 // Cache-aside: Map for fast access, Supabase for persistence across restarts.
 const speedCache = new Map();
