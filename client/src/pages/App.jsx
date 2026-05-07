@@ -78,6 +78,9 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [streak, setStreak] = useState(0);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const silenceTimerRef = useRef(null);
   const [scenario, setScenario] = useState('free');
   const [showScenarioHint, setShowScenarioHint] = useState(false);
   const [customScenario, setCustomScenario] = useState('');
@@ -160,6 +163,9 @@ export default function App() {
     clearInterval(timerRef.current);
     clearTimeout(sttDebounceRef.current);
     sttDebounceRef.current = null;
+    clearTimeout(silenceTimerRef.current);
+    setShowSuggestions(false);
+    setSuggestions([]);
     transcriptBufferRef.current = '';
     cancelSpeech();
     closeAudioSession();
@@ -255,6 +261,31 @@ export default function App() {
         setBtnState(STATE.LISTENING);
         listeningRef.current = true;
         if (isActiveRef.current) startListening();
+
+        // Silence timer — fetch suggestions if user doesn't speak within 5s
+        const level = levelModeRef.current;
+        const skipSuggestions = level === 'B2' || level === 'C1' || level === 'C2';
+        if (!skipSuggestions) {
+          clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = setTimeout(async () => {
+            if (!isActiveRef.current || !listeningRef.current) return;
+            const msgs = messagesRef.current;
+            const lastAiMsg = [...msgs].reverse().find(m => m.role === 'assistant')?.content;
+            if (!lastAiMsg) return;
+            try {
+              const result = await api.getSuggestions({
+                cefrLevel: level === 'auto' ? 'B1' : level,
+                scenario: scenarioRef.current,
+                lastAiMessage: lastAiMsg,
+              });
+              if (!isActiveRef.current) return;
+              if (Array.isArray(result?.suggestions) && result.suggestions.length > 0) {
+                setSuggestions(result.suggestions);
+                setShowSuggestions(true);
+              }
+            } catch { /* fail silently */ }
+          }, 5000);
+        }
       });
     } catch (err) {
       console.error('AI error:', err);
@@ -266,6 +297,9 @@ export default function App() {
   const { start: startListening, stop: stopListening } = useSpeechRecognition({
     onResult: (transcript) => {
       if (!isActiveRef.current || !listeningRef.current) return;
+      // User is speaking — dismiss suggestions and cancel silence timer
+      clearTimeout(silenceTimerRef.current);
+      setShowSuggestions(false);
       setLastTranscript(transcript);
       transcriptBufferRef.current += (transcriptBufferRef.current ? ' ' : '') + transcript;
       clearTimeout(sttDebounceRef.current);
@@ -348,6 +382,15 @@ export default function App() {
   const handleHelpModeChange = (v) => {
     setHelpMode(v); helpModeRef.current = v; localStorage.setItem('getfrench_helpmode', String(v));
   };
+
+  const handleSuggestionTap = useCallback((suggestion) => {
+    clearTimeout(silenceTimerRef.current);
+    setShowSuggestions(false);
+    setSuggestions([]);
+    setAiText('');
+    setIsThinking(true);
+    handleAIResponse(suggestion);
+  }, [handleAIResponse]);
 
   const handleScenarioChange = (id) => {
     setScenario(id);
@@ -439,6 +482,24 @@ export default function App() {
           const s = SCENARIOS.find(x => x.id === scenario);
           return s ? <div className="scenario-hint">{s.emoji} {s.label} mode</div> : null;
         })()}
+
+        {/* Suggestion chips — shown after 5s silence for beginners */}
+        {showSuggestions && suggestions.length > 0 && isSessionActive && (
+          <div className="suggestions-container">
+            <p className="suggestions-label">💡 Vous pouvez dire...</p>
+            <div className="suggestions-row">
+              {suggestions.map((s, i) => (
+                <button
+                  key={i}
+                  className="suggestion-chip"
+                  onClick={() => handleSuggestionTap(s)}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <button
           className={`mic-btn mic-btn--${btnState}`}

@@ -35,6 +35,7 @@ export const api = {
   checkout: (data) => request('/api/stripe/checkout', { method: 'POST', body: JSON.stringify(data) }),
   stripePortal: () => request('/api/stripe/portal', { method: 'POST' }),
   setTtsSpeed: (speed) => request('/api/tts/set-speed', { method: 'POST', body: JSON.stringify({ speed }) }),
+  getSuggestions: (data) => request('/api/chat/suggestions', { method: 'POST', body: JSON.stringify(data) }),
   post: (endpoint, body) => request(`/api${endpoint}`, { method: 'POST', body: JSON.stringify(body) }),
 };
 

@@ -499,4 +499,40 @@ Return a JSON object with these fields (infer from conversation, keep existing v
   }
 });
 
+// Generate suggestion chips for beginners who are silent
+router.post('/suggestions', requireAuth, async (req, res) => {
+  try {
+    const { cefrLevel, scenario, lastAiMessage } = req.body;
+    if (!lastAiMessage) return res.json({ suggestions: [] });
+
+    const response = await anthropic.messages.create({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 100,
+      system: [{
+        type: 'text',
+        text: 'You generate short French conversation suggestions for language learners. Return ONLY a JSON array of 3 strings. No markdown, no explanation. Each suggestion max 8 words in French.',
+        cache_control: { type: 'ephemeral' },
+      }],
+      messages: [{
+        role: 'user',
+        content: `The AI coach just said: "${lastAiMessage.slice(0, 200)}"
+CEFR level: ${cefrLevel || 'B1'}
+Scenario: ${scenario || 'free'}
+
+Generate 3 natural short French responses the user could say right now.
+Keep them short, realistic, and appropriate for the level.
+Return only: ["response1", "response2", "response3"]`,
+      }],
+    });
+
+    let text = response.content[0].text.trim();
+    text = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+    const suggestions = JSON.parse(text);
+    res.json({ suggestions: Array.isArray(suggestions) ? suggestions : [] });
+  } catch (err) {
+    console.error('Suggestions error:', err);
+    res.json({ suggestions: [] }); // fail silently — optional feature
+  }
+});
+
 module.exports = router;
