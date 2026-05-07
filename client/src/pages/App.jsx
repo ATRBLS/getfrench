@@ -50,6 +50,22 @@ const SCENARIOS = [
   { id: 'phone',       emoji: '📞', label: 'Phone call' },
 ];
 
+const SCENARIO_CATEGORIES = [
+  { label: '📍 Daily life',    ids: ['cafe', 'restaurant', 'grocery', 'pharmacy', 'haircut', 'hotel', 'airport', 'taxi', 'bank'] },
+  { label: '💼 Professional',  ids: ['work', 'interview', 'presentation', 'email', 'negotiation', 'phone'] },
+  { label: '🍁 Canadian life', ids: ['neighbor', 'hockey', 'sugar_shack', 'moving', 'school', 'market', 'weather'] },
+  { label: '🎉 Social',        ids: ['party', 'date', 'sport', 'family'] },
+  { label: '🏥 Essential',     ids: ['doctor', 'emergency', 'museum'] },
+];
+
+const DAILY_PICKS = [
+  'cafe', 'restaurant', 'work', 'neighbor',
+  'grocery', 'hockey', 'market', 'party',
+  'hotel', 'pharmacy', 'weather', 'family',
+];
+const DAY_OF_YEAR = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+const DAILY_PICK_ID = DAILY_PICKS[DAY_OF_YEAR % DAILY_PICKS.length];
+
 function getConfidenceLevel(sessions) {
   if (!sessions || sessions <= 3)  return { label: 'Just starting',       icon: '🌱' };
   if (sessions <= 10)              return { label: 'Building confidence',  icon: '📈' };
@@ -456,23 +472,67 @@ export default function App() {
 
         {/* Scenario selector — visible only when idle */}
         {!isSessionActive && (
-          <div className="scenario-row" role="radiogroup" aria-label="Conversation scenario">
-            {SCENARIOS.map(s => (
-              <button
-                key={s.id}
-                className={`scenario-pill${scenario === s.id ? ' active' : ''}`}
-                onClick={() => handleScenarioChange(s.id)}
-                aria-pressed={scenario === s.id}
-              >
-                {s.emoji} {s.label}
-              </button>
+          <div className="scenario-selector" role="radiogroup" aria-label="Conversation scenario">
+
+            {/* Daily pick */}
+            {(() => {
+              const dp = SCENARIOS.find(s => s.id === DAILY_PICK_ID);
+              if (!dp) return null;
+              const isActive = scenario === DAILY_PICK_ID;
+              return (
+                <div
+                  className={`scenario-daily${isActive ? ' scenario-daily--active' : ''}`}
+                  onClick={() => handleScenarioChange(DAILY_PICK_ID)}
+                  role="button"
+                  aria-pressed={isActive}
+                >
+                  <span className="scenario-daily-tag">⭐ Today&rsquo;s pick</span>
+                  <span className="scenario-daily-emoji">{dp.emoji}</span>
+                  <span className="scenario-daily-label">{dp.label}</span>
+                </div>
+              );
+            })()}
+
+            {/* Free chat — standalone full-width */}
+            <button
+              className={`scenario-free-pill${scenario === 'free' ? ' active' : ''}`}
+              onClick={() => handleScenarioChange('free')}
+              aria-pressed={scenario === 'free'}
+            >
+              💬 Free conversation — talk about anything
+            </button>
+
+            {/* Categorized rows */}
+            {SCENARIO_CATEGORIES.map(cat => (
+              <div key={cat.label} className="scenario-category">
+                <p className="scenario-category-label">{cat.label}</p>
+                <div className="scenario-row">
+                  {cat.ids.map(id => {
+                    const s = SCENARIOS.find(x => x.id === id);
+                    if (!s) return null;
+                    return (
+                      <button
+                        key={id}
+                        className={`scenario-pill${scenario === id ? ' active' : ''}`}
+                        onClick={() => handleScenarioChange(id)}
+                        aria-pressed={scenario === id}
+                      >
+                        {s.emoji} {s.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
+
+            {/* Custom — at the bottom */}
             <button
               className={`scenario-pill scenario-pill--custom${scenario === 'custom' ? ' active' : ''}`}
               onClick={() => { setCustomDraft(customScenario); setShowCustomModal(true); }}
             >
               ✏️ Custom
             </button>
+
           </div>
         )}
 
