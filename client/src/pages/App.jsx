@@ -17,6 +17,16 @@ const PLAN_LIMITS = {
   unlimited: { sessions: null, seconds: -1 },
 };
 
+const SCENARIOS = [
+  { id: 'free',     emoji: '💬', label: 'Free chat' },
+  { id: 'cafe',     emoji: '☕', label: 'At the café' },
+  { id: 'work',     emoji: '💼', label: 'Work meeting' },
+  { id: 'grocery',  emoji: '🛒', label: 'Grocery store' },
+  { id: 'neighbor', emoji: '🏠', label: 'Meet a neighbor' },
+  { id: 'doctor',   emoji: '🏥', label: 'Doctor visit' },
+  { id: 'phone',    emoji: '📞', label: 'Phone call' },
+];
+
 function getConfidenceLevel(sessions) {
   if (!sessions || sessions <= 3)  return { label: 'Just starting',       icon: '🌱' };
   if (sessions <= 10)              return { label: 'Building confidence',  icon: '📈' };
@@ -44,6 +54,10 @@ export default function App() {
   const [recapData, setRecapData] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const [scenario, setScenario] = useState('free');
+  const [showScenarioHint, setShowScenarioHint] = useState(false);
+  const scenarioRef = useRef('free');
+  const scenarioHintTimerRef = useRef(null);
   const [error, setError] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -189,6 +203,7 @@ export default function App() {
         newMessages, sessionId,
         corrModeRef.current, levelModeRef.current,
         crosstalkRef.current, helpModeRef.current,
+        scenarioRef.current,
         (chunk) => { fullResponse += chunk; sentenceBuffer += chunk; setAiText(fullResponse); flushSentences(); }
       );
 
@@ -266,6 +281,11 @@ export default function App() {
       }, 1000);
       setBtnState(STATE.LISTENING);
       messagesRef.current = [];
+      if (scenarioRef.current !== 'free') {
+        setShowScenarioHint(true);
+        clearTimeout(scenarioHintTimerRef.current);
+        scenarioHintTimerRef.current = setTimeout(() => setShowScenarioHint(false), 3000);
+      }
       await handleAIResponse('Hello');
     } catch (err) {
       if (err.code === 'limit_reached') setShowUpgrade(true);
@@ -295,6 +315,11 @@ export default function App() {
   };
   const handleHelpModeChange = (v) => {
     setHelpMode(v); helpModeRef.current = v; localStorage.setItem('getfrench_helpmode', String(v));
+  };
+
+  const handleScenarioChange = (id) => {
+    setScenario(id);
+    scenarioRef.current = id;
   };
 
   const handleSignOut  = () => { clearAuth(); navigate('/'); };
@@ -340,6 +365,31 @@ export default function App() {
 
       {/* ─── Center ─── */}
       <div className="app-center">
+
+        {/* Scenario selector — visible only when idle */}
+        {!isSessionActive && (
+          <div className="scenario-row" role="radiogroup" aria-label="Conversation scenario">
+            {SCENARIOS.map(s => (
+              <button
+                key={s.id}
+                className={`scenario-pill${scenario === s.id ? ' active' : ''}`}
+                onClick={() => handleScenarioChange(s.id)}
+                aria-pressed={scenario === s.id}
+              >
+                {s.emoji} {s.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Scenario hint — visible for 3s after session starts */}
+        {isSessionActive && showScenarioHint && (() => {
+          const s = SCENARIOS.find(x => x.id === scenario);
+          return s ? (
+            <div className="scenario-hint">{s.emoji} {s.label} mode</div>
+          ) : null;
+        })()}
+
         <button
           className={`mic-btn mic-btn--${btnState}`}
           onClick={handleButtonClick}

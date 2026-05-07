@@ -203,6 +203,53 @@
 
 .app-error { font-size: 13px; color: #e53935; }
 
+/* ─── Scenario selector ─── */
+
+.scenario-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 4px 4px;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+.scenario-row::-webkit-scrollbar { display: none; }
+
+.scenario-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 50px;
+  border: 1.5px solid #0055A4;
+  background: white;
+  color: #0055A4;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.scenario-pill.active {
+  background: #0055A4;
+  color: white;
+}
+.scenario-pill:active { opacity: 0.75; }
+
+.scenario-hint {
+  background: rgba(0,85,164,0.08);
+  color: #0055A4;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 50px;
+  padding: 5px 14px;
+  animation: fade-in 0.2s ease;
+}
+
 /* ─── Thinking dots ─── */
 
 .thinking-dots {

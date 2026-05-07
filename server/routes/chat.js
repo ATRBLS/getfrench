@@ -6,7 +6,41 @@ const { requireAuth } = require('../middleware/auth');
 const router = express.Router();
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-function buildSystemPrompt(memory, corrMode, levelOverride, crosstalk, helpMode) {
+const SCENARIO_PROMPTS = {
+  cafe: `SCENARIO: Café in Quebec.
+You are a friendly server at a Montreal café. Start by welcoming the user and taking their order.
+Use real café vocabulary naturally: un café allongé, un croissant, l'addition, la terrasse, etc.
+Stay in character throughout. If they struggle, help them gently stay in the scenario.`,
+
+  work: `SCENARIO: Professional French meeting.
+You are a French-speaking colleague in a bilingual Canadian workplace.
+Start with small talk then transition to discussing a project or upcoming deadline.
+Introduce professional vocabulary naturally: une réunion, un compte-rendu, le budget, les livrables.
+Adapt your formality level to the user's French ability.`,
+
+  grocery: `SCENARIO: Grocery store in Quebec.
+You are a helpful store employee. Help the user find items, discuss prices, and check out.
+Use real shopping vocabulary: les légumes, l'allée, la caisse, en solde, le reçu.
+Start by asking what they're looking for today.`,
+
+  neighbor: `SCENARIO: Meeting a French-speaking neighbor in Canada.
+You are a friendly francophone neighbor. Start with weather small talk (very Canadian),
+then ask about how long they've lived here, their work, their family.
+Use casual Quebec expressions naturally. Keep the tone warm and unhurried.`,
+
+  doctor: `SCENARIO: Doctor's office in Quebec.
+You are a French-speaking doctor or nurse. Ask the user about their symptoms.
+Use accessible medical vocabulary: avoir mal à, depuis quand, la fièvre, une ordonnance.
+Be patient, clear, and thorough. This is a high-value real-world scenario.`,
+
+  phone: `SCENARIO: Phone call in French.
+You are on the other end of a phone call (reservation, appointment, or inquiry).
+Start with a standard French phone greeting: "Allô? Bonjour, vous êtes bien chez..."
+Teach phone-specific expressions naturally: Ne quittez pas, Je vous passe, Vous pouvez rappeler?
+Simulate a realistic, slightly imperfect phone interaction — just like real life.`,
+};
+
+function buildSystemPrompt(memory, corrMode, levelOverride, crosstalk, helpMode, scenario) {
   const isAuto = !levelOverride || levelOverride === 'auto';
   const knownCefr = memory?.cefr_level || null;
   const cefrLevel = isAuto ? knownCefr : levelOverride;
@@ -159,6 +193,10 @@ At session 3 of free plan: "C'est votre dernière session gratuite ce mois-ci �
     prompt += `\n\n════ WHAT YOU KNOW ABOUT THIS USER ════\n${JSON.stringify(memory, null, 2)}\n\nUse this context. Don't re-ask what you already know. Build on the relationship.`;
   }
 
+  if (scenario && SCENARIO_PROMPTS[scenario]) {
+    prompt += `\n\n════ CONVERSATION SCENARIO ════\n${SCENARIO_PROMPTS[scenario]}`;
+  }
+
   // ── Active settings override — placed last so it always wins ──────
   // This block overrides conversation history and context. The user
   // may have changed these settings mid-session.
@@ -190,7 +228,7 @@ These settings were chosen by the user and must be respected in your VERY NEXT r
 // Stream chat response
 router.post('/message', requireAuth, async (req, res) => {
   try {
-    const { messages, session_id, corrMode, levelOverride, crosstalk, helpMode } = req.body;
+    const { messages, session_id, corrMode, levelOverride, crosstalk, helpMode, scenario } = req.body;
 
     const { data: user } = await supabase
       .from('users')
@@ -198,7 +236,7 @@ router.post('/message', requireAuth, async (req, res) => {
       .eq('id', req.user.id)
       .single();
 
-    const systemPrompt = buildSystemPrompt(user?.memory, corrMode || 'gentle', levelOverride, !!crosstalk, !!helpMode);
+    const systemPrompt = buildSystemPrompt(user?.memory, corrMode || 'gentle', levelOverride, !!crosstalk, !!helpMode, scenario);
 
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
