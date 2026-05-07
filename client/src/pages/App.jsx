@@ -18,13 +18,36 @@ const PLAN_LIMITS = {
 };
 
 const SCENARIOS = [
-  { id: 'free',     emoji: '💬', label: 'Free chat' },
-  { id: 'cafe',     emoji: '☕', label: 'At the café' },
-  { id: 'work',     emoji: '💼', label: 'Work meeting' },
-  { id: 'grocery',  emoji: '🛒', label: 'Grocery store' },
-  { id: 'neighbor', emoji: '🏠', label: 'Meet a neighbor' },
-  { id: 'doctor',   emoji: '🏥', label: 'Doctor visit' },
-  { id: 'phone',    emoji: '📞', label: 'Phone call' },
+  { id: 'free',        emoji: '💬', label: 'Free chat' },
+  { id: 'cafe',        emoji: '☕', label: 'At the café' },
+  { id: 'restaurant',  emoji: '🍽️', label: 'Restaurant' },
+  { id: 'grocery',     emoji: '🛒', label: 'Grocery store' },
+  { id: 'market',      emoji: '🥦', label: 'Farmers market' },
+  { id: 'pharmacy',    emoji: '💊', label: 'Pharmacy' },
+  { id: 'haircut',     emoji: '✂️', label: 'Hair salon' },
+  { id: 'hotel',       emoji: '🏨', label: 'Hotel check-in' },
+  { id: 'airport',     emoji: '✈️', label: 'Airport' },
+  { id: 'taxi',        emoji: '🚕', label: 'Taxi / Uber' },
+  { id: 'bank',        emoji: '🏦', label: 'At the bank' },
+  { id: 'work',        emoji: '💼', label: 'Work meeting' },
+  { id: 'interview',   emoji: '👔', label: 'Job interview' },
+  { id: 'presentation',emoji: '📊', label: 'Presentation' },
+  { id: 'negotiation', emoji: '🤝', label: 'Negotiation' },
+  { id: 'email',       emoji: '📧', label: 'Professional email' },
+  { id: 'neighbor',    emoji: '🏠', label: 'Meet a neighbor' },
+  { id: 'party',       emoji: '🎉', label: 'At a party' },
+  { id: 'date',        emoji: '💝', label: 'First date' },
+  { id: 'family',      emoji: '👨‍👩‍👧', label: 'Family chat' },
+  { id: 'weather',     emoji: '🌨️', label: 'Weather chat' },
+  { id: 'sport',       emoji: '⚽', label: 'Talking sports' },
+  { id: 'hockey',      emoji: '🏒', label: 'Hockey game' },
+  { id: 'sugar_shack', emoji: '🍁', label: 'Cabane à sucre' },
+  { id: 'moving',      emoji: '📦', label: 'Moving to Quebec' },
+  { id: 'school',      emoji: '🎒', label: 'School meeting' },
+  { id: 'museum',      emoji: '🎨', label: 'At a museum' },
+  { id: 'doctor',      emoji: '🏥', label: 'Doctor visit' },
+  { id: 'emergency',   emoji: '🚨', label: 'Emergency' },
+  { id: 'phone',       emoji: '📞', label: 'Phone call' },
 ];
 
 function getConfidenceLevel(sessions) {
@@ -56,7 +79,11 @@ export default function App() {
   const [isThinking, setIsThinking] = useState(false);
   const [scenario, setScenario] = useState('free');
   const [showScenarioHint, setShowScenarioHint] = useState(false);
+  const [customScenario, setCustomScenario] = useState('');
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [customDraft, setCustomDraft] = useState('');
   const scenarioRef = useRef('free');
+  const customScenarioRef = useRef('');
   const scenarioHintTimerRef = useRef(null);
   const [error, setError] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
@@ -203,7 +230,7 @@ export default function App() {
         newMessages, sessionId,
         corrModeRef.current, levelModeRef.current,
         crosstalkRef.current, helpModeRef.current,
-        scenarioRef.current,
+        scenarioRef.current, customScenarioRef.current,
         (chunk) => { fullResponse += chunk; sentenceBuffer += chunk; setAiText(fullResponse); flushSentences(); }
       );
 
@@ -322,6 +349,16 @@ export default function App() {
     scenarioRef.current = id;
   };
 
+  const handleCustomStart = () => {
+    const text = customDraft.trim();
+    if (!text) return;
+    setCustomScenario(text);
+    customScenarioRef.current = text;
+    setScenario('custom');
+    scenarioRef.current = 'custom';
+    setShowCustomModal(false);
+  };
+
   const handleSignOut  = () => { clearAuth(); navigate('/'); };
   const handlePortal   = async () => {
     setPortalLoading(true);
@@ -379,15 +416,20 @@ export default function App() {
                 {s.emoji} {s.label}
               </button>
             ))}
+            <button
+              className={`scenario-pill scenario-pill--custom${scenario === 'custom' ? ' active' : ''}`}
+              onClick={() => { setCustomDraft(customScenario); setShowCustomModal(true); }}
+            >
+              ✏️ Custom
+            </button>
           </div>
         )}
 
         {/* Scenario hint — visible for 3s after session starts */}
         {isSessionActive && showScenarioHint && (() => {
+          if (scenario === 'custom') return <div className="scenario-hint">✏️ Custom mode</div>;
           const s = SCENARIOS.find(x => x.id === scenario);
-          return s ? (
-            <div className="scenario-hint">{s.emoji} {s.label} mode</div>
-          ) : null;
+          return s ? <div className="scenario-hint">{s.emoji} {s.label} mode</div> : null;
         })()}
 
         <button
@@ -468,6 +510,39 @@ export default function App() {
 
       {showUpgrade && <UpgradeModal onClose={() => setShowUpgrade(false)} sessionCount={userData?.sessions_this_month} />}
       {showRecap && recapData && <RecapModal recap={recapData} onClose={() => setShowRecap(false)} />}
+
+      {/* ─── Custom scenario modal ─── */}
+      {showCustomModal && (
+        <div className="custom-overlay" onClick={() => setShowCustomModal(false)}>
+          <div className="custom-modal" onClick={e => e.stopPropagation()}>
+            <h3 className="custom-modal-title">Create your scenario</h3>
+            <p className="custom-modal-sub">Describe the situation you want to practice in French</p>
+            <textarea
+              className="custom-textarea"
+              rows={4}
+              maxLength={300}
+              placeholder={"Ex: I'm at a job interview at a Montreal tech company. I need to explain my experience in French..."}
+              value={customDraft}
+              onChange={e => setCustomDraft(e.target.value)}
+              autoFocus
+            />
+            <p className="custom-char-count">{customDraft.length}/300</p>
+            <button
+              className="custom-btn-primary"
+              disabled={!customDraft.trim()}
+              onClick={handleCustomStart}
+            >
+              Start practicing →
+            </button>
+            <button
+              className="custom-btn-ghost"
+              onClick={() => { setShowCustomModal(false); if (!customScenario) { setScenario('free'); scenarioRef.current = 'free'; } }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
