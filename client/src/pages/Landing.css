@@ -20,7 +20,8 @@
 .l-nav-inner {
   max-width: 1080px;
   margin: 0 auto;
-  padding: 0 24px 14px;
+  padding: 0 16px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -42,28 +43,29 @@
 .l-nav-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
 }
 
 .l-nav-signin {
   background: transparent;
-  color: var(--foreground);
-  font-weight: 600;
+  border: none;
+  padding: 0;
   font-size: 14px;
-  padding: 9px 18px;
-  border-radius: 50px;
-  border: 1px solid var(--border);
+  font-weight: 600;
+  color: #001858;
+  opacity: 0.7;
   touch-action: manipulation;
   transition: opacity 0.15s;
 }
-.l-nav-signin:active { opacity: 0.7; }
+.l-nav-signin:active { opacity: 1; }
 
 .l-nav-cta {
   background: var(--gradient-coral);
   color: white;
   font-weight: 700;
   font-size: 14px;
-  padding: 9px 22px;
+  padding: 9px 18px;
+  white-space: nowrap;
   border-radius: 50px;
   box-shadow: var(--shadow-glow);
   touch-action: manipulation;
