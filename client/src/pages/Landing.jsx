@@ -11,27 +11,6 @@ const PLANS = [
   { id: 'max',     name: 'Max',     monthly: 44.99, yearly: 39.99, hours: 20 },
 ];
 
-const TESTIMONIALS = [
-  {
-    name: 'Julie M.',
-    role: 'Parent, Ottawa',
-    text: "I studied French for 10 years and still froze every time a francophone colleague spoke to me. Two weeks with GetFrench and I stopped rehearsing sentences in my head before saying them. I just speak.",
-    level: 'A2 → B1',
-  },
-  {
-    name: 'David T.',
-    role: 'Federal Government Analyst, Gatineau',
-    text: "My bilingualism test was the only thing standing between me and a promotion. I knew the grammar — I just couldn't get the words out without panicking. GetFrench broke that block. I passed.",
-    level: 'B1 → B2',
-  },
-  {
-    name: 'Priya S.',
-    role: 'Marketing Director, Montreal',
-    text: "Moving to Quebec, I dreaded every meeting. With GetFrench I could make every mistake privately, every day, until it stopped feeling like a mistake. Now I speak first.",
-    level: 'B2 → C1',
-  },
-];
-
 export default function Landing() {
   const navigate = useNavigate();
   const [yearly, setYearly] = useState(true);
@@ -42,7 +21,7 @@ export default function Landing() {
       <LHero navigate={navigate} />
       <LPain />
       <LHow />
-      <LTestimonials />
+      <LStats />
       <LStory />
       <LPricing navigate={navigate} yearly={yearly} setYearly={setYearly} />
       <LInstall />
@@ -103,68 +82,28 @@ function LHero({ navigate }) {
 }
 
 function LPain() {
-  return (
-    <section className="l-why" id="pain">
-      <div className="l-why-orbs" aria-hidden="true">
-        <div className="l-why-orb l-why-orb--coral" />
-        <div className="l-why-orb l-why-orb--sky" />
-      </div>
-      <div className="l-why-inner">
-        <p className="l-eyebrow l-eyebrow--light">The real problem</p>
-        <h2>
-          You don&rsquo;t have a French problem.<br />
-          <span className="l-accent-sky">You have a fear problem.</span>
-        </h2>
-        <p className="l-why-sub">
-          You&rsquo;ve taken classes. You know the grammar. You understand when someone speaks to you.
-          But the moment you have to open your mouth — in front of a colleague, a store clerk, a client —
-          your mind goes blank. You second-guess every word. You stay silent.
-        </p>
-        <p className="l-why-sub" style={{ marginTop: '1rem' }}>
-          That&rsquo;s not a vocabulary gap. That&rsquo;s the brain shutting down under social pressure.
-          And no textbook, no app, no grammar exercise fixes it.
-          <strong> The only thing that fixes it is speaking. A lot. Without fear.</strong>
-        </p>
-        <div className="l-why-stats">
-          {[
-            { value: '0', label: 'judgments. Ever.' },
-            { value: '24/7', label: 'available when the fear hits' },
-            { value: '3×', label: 'faster progress speaking vs. studying' },
-          ].map(s => (
-            <div key={s.value} className="l-stat">
-              <span>{s.value}</span>
-              <p>{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function LHow() {
   const cards = [
     {
-      icon: '🎙️',
-      title: 'No one is watching',
-      desc: 'With a real person, every mistake feels embarrassing. With GetFrench, you can say "j\'ai allé au magasin" without anyone flinching. Make the mistake. Hear the correction. Move on.',
+      icon: '😰',
+      title: 'You know more than you think',
+      desc: "Most Canadians have studied French for years. The problem isn't knowledge. It's the fear of being judged.",
+    },
+    {
+      icon: '🎯',
+      title: 'Practice without pressure',
+      desc: 'GetFrench gives you a patient AI coach available 24/7. No embarrassment. No awkward silences. Just practice.',
     },
     {
       icon: '🔄',
-      title: 'You learn by speaking, not studying',
-      desc: 'Apps teach grammar. Textbooks teach vocabulary. Neither teaches your mouth to form French words under pressure. GetFrench does — one real conversation at a time.',
-    },
-    {
-      icon: '📈',
-      title: 'Confidence compounds',
-      desc: 'The first session is hard. The third one feels natural. Every mistake you make safely here is one less block in the real world. Your French was never the problem.',
+      title: 'Real conversations, real scenarios',
+      desc: 'Order at a café, practice a work meeting, chat with a neighbor — in French, at your own pace.',
     },
   ];
   return (
-    <section className="l-section" id="how">
+    <section className="l-section" id="pain">
       <div className="l-section-inner">
-        <p className="l-eyebrow">How it works</p>
-        <h2>A private space to find your French voice</h2>
+        <p className="l-eyebrow">Why it works</p>
+        <h2>You don&rsquo;t have a French problem.<br />You have a fear problem.</h2>
         <div className="l-how-grid">
           {cards.map(c => (
             <div key={c.title} className="l-card">
@@ -174,15 +113,46 @@ function LHow() {
             </div>
           ))}
         </div>
-        <div className="l-how-extra">
-          <div className="l-how-extra-card">
-            <p className="l-how-extra-label">Also</p>
-            <ul className="l-how-extra-list">
-              <li>Remembers your level, your goals, and your weak points across every session</li>
-              <li>Adapts vocabulary and pace from A1 to C2 in real time</li>
-              <li>Available at 11pm when you just bombed a French conversation and need to rebuild</li>
-            </ul>
-          </div>
+      </div>
+    </section>
+  );
+}
+
+function LHow() {
+  const steps = [
+    {
+      n: '1',
+      icon: '🎙️',
+      title: 'Choose your scenario',
+      desc: 'Pick from 7 real-life situations — café, work meeting, grocery store, and more — or just talk freely.',
+    },
+    {
+      n: '2',
+      icon: '🗣️',
+      title: 'Speak French',
+      desc: 'Your AI coach listens, responds naturally, and adapts to your level in real time. Make mistakes. That\'s the point.',
+    },
+    {
+      n: '3',
+      icon: '📈',
+      title: 'See your progress',
+      desc: 'After every session, get a personal feedback report with your best moment, words to remember, and what to focus on next.',
+    },
+  ];
+  return (
+    <section className="l-section" id="how">
+      <div className="l-section-inner">
+        <p className="l-eyebrow">How it works</p>
+        <h2>Three steps to speaking French</h2>
+        <div className="l-steps-grid">
+          {steps.map(s => (
+            <div key={s.n} className="l-step-card">
+              <div className="l-step-num">{s.n}</div>
+              <span className="l-card-icon">{s.icon}</span>
+              <h3>{s.title}</h3>
+              <p>{s.desc}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -207,25 +177,38 @@ function LStory() {
   );
 }
 
-function LTestimonials() {
+function LStats() {
+  const stats = [
+    {
+      value: '65%',
+      label: 'of French learners say fear, not grammar, holds them back',
+      source: 'Language Learning Journal, 2019',
+    },
+    {
+      value: '7',
+      label: 'real-life scenarios to practice',
+      source: 'from café to work meetings',
+    },
+    {
+      value: '24/7',
+      label: 'your coach is available',
+      source: 'no scheduling, no waiting',
+    },
+  ];
   return (
-    <section className="l-section">
-      <div className="l-section-inner">
-        <p className="l-eyebrow">Real stories</p>
-        <h2>The moment the block broke</h2>
-        <div className="l-testimonials">
-          {TESTIMONIALS.map(t => (
-            <div key={t.name} className="l-testimonial">
-              <div className="l-stars">★★★★★</div>
-              <p className="l-quote-text">&ldquo;{t.text}&rdquo;</p>
-              <div className="l-testimonial-footer">
-                <div className="l-avatar">{t.name[0]}</div>
-                <div>
-                  <p className="l-author">{t.name}</p>
-                  <p className="l-author-role">{t.role}</p>
-                </div>
-                <span className="l-level-pill">{t.level}</span>
-              </div>
+    <section className="l-why">
+      <div className="l-why-orbs" aria-hidden="true">
+        <div className="l-why-orb l-why-orb--coral" />
+        <div className="l-why-orb l-why-orb--sky" />
+      </div>
+      <div className="l-why-inner">
+        <p className="l-eyebrow l-eyebrow--light">Built for Canadians who want to speak</p>
+        <div className="l-why-stats l-why-stats--large">
+          {stats.map(s => (
+            <div key={s.value} className="l-stat l-stat--light">
+              <span>{s.value}</span>
+              <p>{s.label}</p>
+              <small>{s.source}</small>
             </div>
           ))}
         </div>
