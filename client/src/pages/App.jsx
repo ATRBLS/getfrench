@@ -43,6 +43,7 @@ export default function App() {
   const [showRecap, setShowRecap] = useState(false);
   const [recapData, setRecapData] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const [error, setError] = useState('');
   const [portalLoading, setPortalLoading] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -168,14 +169,14 @@ export default function App() {
       while ((match = sentenceRe.exec(sentenceBuffer)) !== null) {
         const sentence = match[0].trim();
         if (sentence) {
-          if (!speakingStarted) { speakingStarted = true; setBtnState(STATE.SPEAKING); setLastTranscript(''); }
+          if (!speakingStarted) { speakingStarted = true; setBtnState(STATE.SPEAKING); setIsThinking(false); setLastTranscript(''); }
           enqueueSentence(sentence);
         }
         lastIndex = sentenceRe.lastIndex;
       }
       sentenceBuffer = sentenceBuffer.slice(lastIndex);
       if (isFinal && sentenceBuffer.trim()) {
-        if (!speakingStarted) { speakingStarted = true; setBtnState(STATE.SPEAKING); setLastTranscript(''); }
+        if (!speakingStarted) { speakingStarted = true; setBtnState(STATE.SPEAKING); setIsThinking(false); setLastTranscript(''); }
         enqueueSentence(sentenceBuffer.trim());
         sentenceBuffer = '';
       }
@@ -208,6 +209,7 @@ export default function App() {
       });
     } catch (err) {
       console.error('AI error:', err);
+      setIsThinking(false);
       if (isActiveRef.current) setBtnState(STATE.IDLE);
     }
   }, [sessionId, enqueueSentence, finalize, getRemainingSeconds, showLowTime]);
@@ -224,8 +226,9 @@ export default function App() {
         transcriptBufferRef.current = '';
         if (!full || !isActiveRef.current) return;
         setAiText('');
+        setIsThinking(true);
         handleAIResponse(full);
-      }, 2000);
+      }, 1200);
     },
     onEnd: () => { if (isActiveRef.current && listeningRef.current) startListening(); },
     onError: (err) => {
@@ -355,9 +358,14 @@ export default function App() {
         {btnState !== STATE.IDLE && (
           <p className="state-label">
             {btnState === STATE.LISTENING && 'Listening...'}
-            {btnState === STATE.THINKING  && '...'}
             {btnState === STATE.SPEAKING  && ''}
           </p>
+        )}
+
+        {isThinking && (
+          <div className="thinking-dots" aria-label="Thinking">
+            <span /><span /><span />
+          </div>
         )}
 
         {isSessionActive && remaining !== null && (

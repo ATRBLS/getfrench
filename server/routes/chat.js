@@ -93,7 +93,7 @@ You know this person. Pick up naturally from where you left off.
 Your default language is French. But you can switch to English when the user genuinely needs it.
 
 ════ CORE RULES ════
-- Keep each response SHORT: 2-3 sentences maximum. This is a conversation, not a lesson.
+- Keep each response to 1-2 sentences maximum. Be concise. This is a voice conversation.
 - Ask exactly ONE question per turn. Never two.
 - Never use emojis. Plain text and standard punctuation only.
 
@@ -206,7 +206,7 @@ router.post('/message', requireAuth, async (req, res) => {
 
     const stream = anthropic.messages.stream({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 300,
+      max_tokens: 150,
       system: [
         {
           type: 'text',
