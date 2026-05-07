@@ -9,7 +9,7 @@ router.get('/me', requireAuth, async (req, res) => {
   try {
     const { data: user, error } = await supabase
       .from('users')
-      .select('id, email, name, plan, sessions_this_month, seconds_used, reset_date, memory')
+      .select('id, email, name, plan, sessions_this_month, seconds_used, reset_date, memory, streak_count, last_session_date')
       .eq('id', req.user.id)
       .single();
 
@@ -109,19 +109,37 @@ router.post('/end', requireAuth, async (req, res) => {
       .eq('id', session_id)
       .eq('user_id', req.user.id);
 
-    // Update total seconds and save memory
+    // Update total seconds, save memory, and calculate streak
     const { data: user } = await supabase
       .from('users')
-      .select('seconds_used')
+      .select('seconds_used, streak_count, last_session_date')
       .eq('id', req.user.id)
       .single();
 
-    const updates = { seconds_used: (user.seconds_used || 0) + duration_seconds };
+    const today = new Date().toISOString().split('T')[0];
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    const last = user?.last_session_date;
+    let newStreak = 1;
+    if (last === today) {
+      newStreak = user.streak_count || 1;        // already practiced today
+    } else if (last === yesterdayStr) {
+      newStreak = (user.streak_count || 0) + 1;  // consecutive day
+    }
+    // else: missed a day — reset to 1
+
+    const updates = {
+      seconds_used: (user.seconds_used || 0) + duration_seconds,
+      streak_count: newStreak,
+      last_session_date: today,
+    };
     if (summary) updates.memory = summary;
 
     await supabase.from('users').update(updates).eq('id', req.user.id);
 
-    res.json({ ok: true });
+    res.json({ ok: true, streak_count: newStreak });
   } catch (err) {
     console.error('End session error:', err);
     res.status(500).json({ error: 'Server error' });

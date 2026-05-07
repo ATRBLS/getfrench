@@ -7,16 +7,27 @@ function getHeaderEmoji(score) {
   return '🌱';
 }
 
+function getStreakLabel(streak) {
+  if (streak === 30) return '30 days! Incredible! ⭐';
+  if (streak === 7)  return "One week! You're on fire! 🔥";
+  if (streak === 3)  return '3 days strong! 💪';
+  if (streak >= 7)   return 'On fire! 🔥';
+  if (streak === 1)  return 'Great start!';
+  return 'Keep it up!';
+}
+
 export default function RecapModal({ recap, onClose }) {
   const {
     encouragement,
     fluency_score,
-    session_count,
+    streak_count,
     session_duration_label,
     strongest_moment,
     next_session_tip,
     words_to_remember,
   } = recap;
+
+  const streak = streak_count || 0;
 
   const emoji = getHeaderEmoji(fluency_score);
 
@@ -46,8 +57,8 @@ export default function RecapModal({ recap, onClose }) {
           </div>
           <div className="recap-stat">
             <span className="recap-stat-icon">🔥</span>
-            <span className="recap-stat-value">Day {session_count || 1}</span>
-            <span className="recap-stat-label">Streak</span>
+            <span className="recap-stat-value">{streak} day{streak !== 1 ? 's' : ''}</span>
+            <span className="recap-stat-label">{getStreakLabel(streak)}</span>
           </div>
         </div>
 

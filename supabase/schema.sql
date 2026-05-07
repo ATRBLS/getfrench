@@ -1,4 +1,4 @@
--- Speakr database schema
+-- GetFrench database schema
 -- Run this in the Supabase SQL editor
 
 create table if not exists users (
@@ -11,8 +11,15 @@ create table if not exists users (
   reset_date timestamptz not null,
   memory jsonb not null default '{}',
   stripe_customer_id text,
+  streak_count integer not null default 0,
+  last_session_date date,
+  cefr_level text,
   created_at timestamptz not null default now()
 );
+
+-- Run on existing databases to add streak columns:
+-- ALTER TABLE users ADD COLUMN IF NOT EXISTS streak_count INTEGER DEFAULT 0;
+-- ALTER TABLE users ADD COLUMN IF NOT EXISTS last_session_date DATE;
 
 create table if not exists sessions (
   id uuid primary key default gen_random_uuid(),

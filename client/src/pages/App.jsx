@@ -77,6 +77,7 @@ export default function App() {
   const [recapData, setRecapData] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
+  const [streak, setStreak] = useState(0);
   const [scenario, setScenario] = useState('free');
   const [showScenarioHint, setShowScenarioHint] = useState(false);
   const [customScenario, setCustomScenario] = useState('');
@@ -131,6 +132,7 @@ export default function App() {
     if (!isAuthenticated()) { navigate('/auth', { replace: true }); return; }
     api.getMe().then(user => {
       setUserData(user);
+      setStreak(user.streak_count || 0);
       if (user.memory && Object.keys(user.memory).length > 0) setShowMemoryDot(true);
     }).catch(err => {
       if (err.status === 401) { clearAuth(); navigate('/auth', { replace: true }); }
@@ -172,7 +174,10 @@ export default function App() {
         const sessionMinutes = Math.floor(duration / 60);
         summary.total_minutes = (userData?.memory?.total_minutes || 0) + sessionMinutes;
         summary.session_duration_label = sessionMinutes < 5 ? 'Quick practice' : sessionMinutes <= 10 ? 'Good session' : 'Deep practice';
-        await api.endSession({ session_id: sessionId, duration_seconds: duration, summary });
+        const endResult = await api.endSession({ session_id: sessionId, duration_seconds: duration, summary });
+        const newStreak = endResult?.streak_count || streak;
+        setStreak(newStreak);
+        summary.streak_count = newStreak;
         setUserData(prev => ({ ...prev, memory: summary }));
         setShowMemoryDot(true);
         setRecapData(summary);
@@ -383,6 +388,9 @@ export default function App() {
           {sessionLabel && <span className="session-count">{sessionLabel}</span>}
         </div>
         <div className="header-right">
+          {streak > 0 && (
+            <div className="streak-badge">🔥 {streak}</div>
+          )}
           <span className="confidence-badge">{confidence.icon} {confidence.label}</span>
           <div className="settings-btn-wrap">
             <button
