@@ -128,7 +128,9 @@ export default function App() {
     if (sessionId && currentMessages.length > 0) {
       try {
         const summary = await api.summarize({ messages: currentMessages, existing_memory: userData?.memory });
-        summary.total_minutes = (userData?.memory?.total_minutes || 0) + Math.floor(duration / 60);
+        const sessionMinutes = Math.floor(duration / 60);
+        summary.total_minutes = (userData?.memory?.total_minutes || 0) + sessionMinutes;
+        summary.session_duration_label = sessionMinutes < 5 ? 'Quick practice' : sessionMinutes <= 10 ? 'Good session' : 'Deep practice';
         await api.endSession({ session_id: sessionId, duration_seconds: duration, summary });
         setUserData(prev => ({ ...prev, memory: summary }));
         setShowMemoryDot(true);

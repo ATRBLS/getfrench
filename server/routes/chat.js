@@ -244,7 +244,7 @@ router.post('/summarize', requireAuth, async (req, res) => {
 
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1200,
+      max_tokens: 1500,
       system: [
         {
           type: 'text',
@@ -286,7 +286,11 @@ Return a JSON object with these fields (infer from conversation, keep existing v
   "encouragement": "personalized congratulation message in French based on their progress this session",
   "last_session_summary": "copy of session_summary — used to resume next session",
   "session_count": ${(existing_memory?.session_count || 0) + 1},
-  "total_minutes": ${(existing_memory?.total_minutes || 0)}
+  "total_minutes": ${(existing_memory?.total_minutes || 0)},
+  "strongest_moment": "The single best sentence or phrase the user produced in French this session — quote it exactly. If they only spoke English, quote their best attempt anyway.",
+  "biggest_mistake": "The most common or important grammar/vocabulary error made this session — describe it briefly in English (e.g. 'Used avoir instead of être with reflexive verbs'). Null if no clear mistake.",
+  "next_session_tip": "One specific actionable thing to focus on next session, in English, based on their weak points. Max 1 sentence. Be encouraging and concrete.",
+  "fluency_score": "Integer 1-10 rating of how naturally and fluidly the user spoke French this session. 1=only English or no attempt, 4=very hesitant with many errors, 7=decent fluency with some errors, 10=near-native. Be honest but encouraging."
 }`,
         },
       ],
