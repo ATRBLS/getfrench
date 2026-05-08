@@ -150,6 +150,7 @@ export default function App() {
       if (user.memory && Object.keys(user.memory).length > 0) setShowMemoryDot(true);
     }).catch(err => {
       if (err.status === 401) { clearAuth(); navigate('/auth', { replace: true }); }
+      else { setError('Could not load your account. Check your connection and reload.'); }
     });
   }, [navigate, searchParams]);
 
@@ -369,9 +370,14 @@ export default function App() {
   }, [userData, endSession, handleAIResponse, createAudioSession]);
 
   const handleButtonClick = useCallback(() => {
+    if (!userData && !isActiveRef.current) {
+      setError('Still loading… please wait a moment and try again.');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
     if (!isActiveRef.current) startSession();
     else endSession();
-  }, [startSession, endSession]);
+  }, [startSession, endSession, userData]);
 
   const handleSpeedChange = (v) => {
     setSpeed(v); localStorage.setItem('getfrench_speed', v);
@@ -530,17 +536,21 @@ export default function App() {
             <div className="ring ring-1" /><div className="ring ring-2" /><div className="ring ring-3" />
           </div>
           <div className="mic-inner">
-            {btnState === STATE.IDLE      && <MicIcon />}
-            {btnState === STATE.LISTENING && <MicIcon />}
-            {btnState === STATE.THINKING  && <Spinner />}
-            {btnState === STATE.SPEAKING  && <WaveIcon />}
+            {!userData && !isSessionActive ? <Spinner /> : (
+              <>
+                {btnState === STATE.IDLE      && <MicIcon />}
+                {btnState === STATE.LISTENING && <MicIcon />}
+                {btnState === STATE.THINKING  && <Spinner />}
+                {btnState === STATE.SPEAKING  && <WaveIcon />}
+              </>
+            )}
           </div>
         </button>
 
         {/* Home state — below mic */}
         {!isSessionActive && (
           <>
-            <p className="idle-tagline">Tap to speak in French</p>
+            <p className="idle-tagline">{userData ? 'Tap to speak in French' : 'Loading…'}</p>
             <button className="scenario-change-link" onClick={() => setShowScenarioSheet(true)}>
               📍 Change scenario
             </button>

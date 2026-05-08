@@ -11,10 +11,15 @@ import Story from './pages/Story';
 import InstallBanner from './components/InstallBanner';
 import { isAuthenticated } from './lib/auth';
 
-// Register service worker
+// Register service worker and auto-reload when a new version activates
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+  // When the SW controller changes (new version took over), reload to pick up fresh assets
+  let swReloading = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!swReloading) { swReloading = true; window.location.reload(); }
   });
 }
 
