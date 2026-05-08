@@ -176,42 +176,56 @@ export default function App() {
     clearTimeout(sttDebounceRef.current);
     sttDebounceRef.current = null;
     clearTimeout(silenceTimerRef.current);
-    setShowSuggestions(false);
-    setSuggestions([]);
-    transcriptBufferRef.current = '';
     cancelSpeech();
     closeAudioSession();
 
     const duration = Math.floor((Date.now() - sessionStartRef.current) / 1000);
     const currentMessages = messagesRef.current;
+    const savedSessionId = sessionId;
+    const savedUserData = userData;
+
+    // Reset to home state immediately — don't wait for async recap generation
     setBtnState(STATE.IDLE);
-
-    if (sessionId && currentMessages.length > 0) {
-      try {
-        const summary = await api.summarize({ messages: currentMessages, existing_memory: userData?.memory });
-        const sessionMinutes = Math.floor(duration / 60);
-        summary.total_minutes = (userData?.memory?.total_minutes || 0) + sessionMinutes;
-        summary.session_duration_label = sessionMinutes < 5 ? 'Quick practice' : sessionMinutes <= 10 ? 'Good session' : 'Deep practice';
-        const endResult = await api.endSession({ session_id: sessionId, duration_seconds: duration, summary });
-        const newStreak = endResult?.streak_count || streak;
-        setStreak(newStreak);
-        summary.streak_count = newStreak;
-        setUserData(prev => ({ ...prev, memory: summary }));
-        setShowMemoryDot(true);
-        setRecapData(summary);
-        setShowRecap(true);
-      } catch (err) {
-        console.error('Failed to save session:', err);
-        await api.endSession({ session_id: sessionId, duration_seconds: duration }).catch(() => {});
-      }
-    }
-
     setSessionId(null);
     setElapsed(0);
     setMessages([]);
     messagesRef.current = [];
     sessionStartRef.current = null;
-  }, [sessionId, userData, cancelSpeech, closeAudioSession]);
+    setShowSuggestions(false);
+    setSuggestions([]);
+    transcriptBufferRef.current = '';
+
+    if (!savedSessionId || currentMessages.length === 0) return;
+
+    const sessionMinutes = Math.floor(duration / 60);
+    const durationLabel = sessionMinutes < 5 ? 'Quick practice' : sessionMinutes <= 10 ? 'Good session' : 'Deep practice';
+
+    try {
+      const summary = await api.summarize({ messages: currentMessages, existing_memory: savedUserData?.memory });
+      summary.total_minutes = (savedUserData?.memory?.total_minutes || 0) + sessionMinutes;
+      summary.session_duration_label = durationLabel;
+      const endResult = await api.endSession({ session_id: savedSessionId, duration_seconds: duration, summary });
+      const newStreak = endResult?.streak_count || streak;
+      setStreak(newStreak);
+      summary.streak_count = newStreak;
+      setUserData(prev => ({ ...prev, memory: summary }));
+      setShowMemoryDot(true);
+      setRecapData(summary);
+      setShowRecap(true);
+    } catch (err) {
+      console.error('Failed to save session:', err);
+      // Save session without summary, and show a minimal recap
+      const endResult = await api.endSession({ session_id: savedSessionId, duration_seconds: duration }).catch(() => null);
+      const newStreak = endResult?.streak_count || streak;
+      setStreak(newStreak);
+      setRecapData({
+        session_duration_label: durationLabel,
+        streak_count: newStreak,
+        encouragement: 'Session terminée ! Continue comme ça. 💪',
+      });
+      setShowRecap(true);
+    }
+  }, [sessionId, userData, streak, cancelSpeech, closeAudioSession]);
 
   const handleAIResponse = useCallback(async (userTranscript) => {
     if (!isActiveRef.current) return;

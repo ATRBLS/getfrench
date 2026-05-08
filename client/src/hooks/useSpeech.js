@@ -167,12 +167,9 @@ export function useSpeechSynthesis() {
       })
       .catch((err) => {
         if (gen !== genRef.current || err.message === 'cancelled') return;
-        console.error('[TTS] ElevenLabs failed, falling back to Web Speech:', err.message);
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang  = 'fr-FR';
-        utterance.rate  = 1.1;
-        utterance.onend = utterance.onerror = () => playNext(gen);
-        window.speechSynthesis.speak(utterance);
+        console.error('[TTS] ElevenLabs failed, skipping sentence:', err.message);
+        // Skip silently rather than switching to Web Speech (avoids jarring voice/accent change)
+        playNext(gen);
       });
   }, []);
 
