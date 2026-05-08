@@ -1,6 +1,5 @@
-const CACHE = 'speakr-v1';
-const STATIC = [
-  '/',
+const CACHE = 'getfrench-v2';
+const SHELL = [
   '/app',
   '/auth',
   '/manifest.json',
@@ -8,14 +7,14 @@ const STATIC = [
   '/icons/icon-512.png',
 ];
 
-// Install: cache static shell
+// Install: pre-cache the app shell
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(STATIC)).then(() => self.skipWaiting())
+    caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())
   );
 });
 
-// Activate: delete old caches
+// Activate: delete old caches and take control immediately
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys()
@@ -24,19 +23,14 @@ self.addEventListener('activate', (e) => {
   );
 });
 
-// Fetch strategy:
-//   - API calls → network-only (never cache)
-//   - JS/CSS assets (hashed) → cache-first
-//   - HTML navigation → network-first, fallback to cache
 self.addEventListener('fetch', (e) => {
   const { request } = e;
   const url = new URL(request.url);
 
-  // Skip non-GET and API calls
   if (request.method !== 'GET') return;
   if (url.pathname.startsWith('/api/')) return;
 
-  // Hashed assets (Vite fingerprints): cache-first
+  // Hashed Vite assets: cache-first forever (hash changes when content changes)
   if (url.pathname.startsWith('/assets/')) {
     e.respondWith(
       caches.match(request).then(cached => cached || fetch(request).then(res => {
@@ -48,16 +42,19 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // HTML navigation: network-first, fall back to cached shell
+  // HTML navigation: cache-first, update in background (stale-while-revalidate)
+  // Serves instantly from cache → no white screen on launch
   if (request.mode === 'navigate') {
     e.respondWith(
-      fetch(request)
-        .then(res => {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(request, clone));
-          return res;
+      caches.open(CACHE).then(cache =>
+        cache.match(request).then(cached => {
+          const networkFetch = fetch(request).then(res => {
+            if (res.ok) cache.put(request, res.clone());
+            return res;
+          }).catch(() => null);
+          return cached || networkFetch;
         })
-        .catch(() => caches.match('/') || caches.match(request))
+      )
     );
     return;
   }

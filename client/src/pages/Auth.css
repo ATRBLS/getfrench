@@ -120,3 +120,30 @@
   margin-top: 8px;
   touch-action: manipulation;
 }
+
+/* Google sign-in loading state */
+.auth-signing-in {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 32px 0;
+}
+
+.auth-spinner {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(0,85,164,0.15);
+  border-top-color: #0055A4;
+  animation: auth-spin 0.7s linear infinite;
+}
+
+@keyframes auth-spin {
+  to { transform: rotate(360deg); }
+}
+
+.auth-signing-text {
+  font-size: 15px;
+  color: var(--muted);
+}

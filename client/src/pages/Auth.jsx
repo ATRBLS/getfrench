@@ -11,6 +11,7 @@ export default function Auth() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function Auth() {
           client_id: clientId,
           callback: async ({ credential }) => {
             console.log('[Auth] Google credential received, length:', credential?.length);
+            setSigningIn(true);
             try {
               const { token: jwt, user } = await api.googleAuth(credential);
               console.log('[Auth] googleAuth success, user:', user?.email, '| token length:', jwt?.length);
@@ -60,6 +62,7 @@ export default function Auth() {
               navigate('/app', { replace: true });
             } catch (err) {
               console.error('[Auth] googleAuth failed:', err.status, err.message, err);
+              setSigningIn(false);
               setError(`Google sign-in failed: ${err.message || 'unknown error'}`);
             }
           },
@@ -112,6 +115,20 @@ export default function Auth() {
       setLoading(false);
     }
   };
+
+  if (signingIn) {
+    return (
+      <div className="auth-page">
+        <div className="auth-card">
+          <div className="auth-logo">GetFrench</div>
+          <div className="auth-signing-in">
+            <div className="auth-spinner" />
+            <p className="auth-signing-text">Signing you in…</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="auth-page">
