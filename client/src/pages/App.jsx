@@ -73,8 +73,6 @@ function getConfidenceLevel(sessions) {
   return                                  { label: 'Consistent practice',  icon: '⭐' };
 }
 
-// ─── Settings ─────────────────────────────────────────────────────────────────
-// Read from localStorage so preferences persist across sessions.
 function readLS(key, fallback) {
   try { const v = localStorage.getItem(key); return v !== null ? v : fallback; } catch { return fallback; }
 }
@@ -99,6 +97,7 @@ export default function App() {
   const silenceTimerRef = useRef(null);
   const [scenario, setScenario] = useState('free');
   const [showScenarioHint, setShowScenarioHint] = useState(false);
+  const [showScenarioSheet, setShowScenarioSheet] = useState(false);
   const [customScenario, setCustomScenario] = useState('');
   const [showCustomModal, setShowCustomModal] = useState(false);
   const [customDraft, setCustomDraft] = useState('');
@@ -111,14 +110,12 @@ export default function App() {
   const [lastTranscript, setLastTranscript] = useState('');
   const [aiText, setAiText] = useState('');
 
-  // Settings — persisted in localStorage
   const [speed, setSpeed]         = useState(() => readLS('getfrench_speed', 'normal'));
   const [corrMode, setCorrMode]   = useState(() => readLS('getfrench_corrmode', 'gentle'));
   const [levelMode, setLevelMode] = useState(() => readLS('getfrench_level', 'auto'));
   const [crosstalk, setCrosstalk] = useState(() => readLS('getfrench_crosstalk', 'false') === 'true');
   const [helpMode, setHelpMode]   = useState(() => readLS('getfrench_helpmode', 'false') === 'true');
 
-  // Refs for use inside callbacks (avoid stale closures)
   const corrModeRef   = useRef(readLS('getfrench_corrmode', 'gentle'));
   const levelModeRef  = useRef(readLS('getfrench_level', 'auto'));
   const crosstalkRef  = useRef(readLS('getfrench_crosstalk', 'false') === 'true');
@@ -134,8 +131,6 @@ export default function App() {
 
   const { enqueueSentence, finalize, cancel: cancelSpeech, createAudioSession, closeAudioSession } = useSpeechSynthesis();
 
-  // Client-side speed control via AudioBufferSourceNode.playbackRate.
-  // ElevenLabs' own speed param has negligible effect; this is the only reliable approach.
   useEffect(() => {
     const speedMap = { slow: 0.72, normal: 1.0, fast: 1.35 };
     window.__gfSpeed = speedMap[readLS('getfrench_speed', 'normal')] || 1.0;
@@ -278,7 +273,6 @@ export default function App() {
         listeningRef.current = true;
         if (isActiveRef.current) startListening();
 
-        // Silence timer — fetch suggestions if user doesn't speak within 5s
         const level = levelModeRef.current;
         const skipSuggestions = level === 'B2' || level === 'C1' || level === 'C2';
         if (!skipSuggestions) {
@@ -313,7 +307,6 @@ export default function App() {
   const { start: startListening, stop: stopListening } = useSpeechRecognition({
     onResult: (transcript) => {
       if (!isActiveRef.current || !listeningRef.current) return;
-      // User is speaking — dismiss suggestions and cancel silence timer
       clearTimeout(silenceTimerRef.current);
       setShowSuggestions(false);
       setLastTranscript(transcript);
@@ -380,7 +373,6 @@ export default function App() {
     else endSession();
   }, [startSession, endSession]);
 
-  // ─── Settings handlers (sync state + ref + localStorage) ───────────────────
   const handleSpeedChange = (v) => {
     setSpeed(v); localStorage.setItem('getfrench_speed', v);
     const map = { slow: 0.72, normal: 1.0, fast: 1.35 };
@@ -413,6 +405,11 @@ export default function App() {
     scenarioRef.current = id;
   };
 
+  const handleScenarioSelect = (id) => {
+    handleScenarioChange(id);
+    setShowScenarioSheet(false);
+  };
+
   const handleCustomStart = () => {
     const text = customDraft.trim();
     if (!text) return;
@@ -437,6 +434,12 @@ export default function App() {
   const sessionLabel  = userData ? (sessionCount === 0 ? 'First session' : `Session ${sessionCount + 1}`) : '';
   const confidence    = getConfidenceLevel(sessionCount);
 
+  const currentScenarioDisplay = (() => {
+    if (scenario === 'custom') return { emoji: '✏️', label: customScenario || 'Custom mode' };
+    const s = SCENARIOS.find(x => x.id === scenario);
+    return s ? { emoji: s.emoji, label: s.label } : { emoji: '💬', label: 'Free conversation' };
+  })();
+
   return (
     <div className="app-page">
 
@@ -450,7 +453,6 @@ export default function App() {
           {streak > 0 && (
             <div className="streak-badge">🔥 {streak}</div>
           )}
-          <span className="confidence-badge">{confidence.icon} {confidence.label}</span>
           <div className="settings-btn-wrap">
             <button
               className="settings-btn"
@@ -467,81 +469,38 @@ export default function App() {
         </div>
       </div>
 
+      {/* ─── Confidence badge — centered below header, home state only ─── */}
+      {!isSessionActive && (
+        <div className="confidence-row">
+          <span className="confidence-badge">{confidence.icon} {confidence.label}</span>
+        </div>
+      )}
+
       {/* ─── Center ─── */}
       <div className="app-center">
 
-        {/* Scenario selector — visible only when idle */}
+        <div className="app-spacer" />
+
+        {/* Home state — scenario trigger pill */}
         {!isSessionActive && (
-          <div className="scenario-selector" role="radiogroup" aria-label="Conversation scenario">
-
-            {/* Daily pick */}
-            {(() => {
-              const dp = SCENARIOS.find(s => s.id === DAILY_PICK_ID);
-              if (!dp) return null;
-              const isActive = scenario === DAILY_PICK_ID;
-              return (
-                <div
-                  className={`scenario-daily${isActive ? ' scenario-daily--active' : ''}`}
-                  onClick={() => handleScenarioChange(DAILY_PICK_ID)}
-                  role="button"
-                  aria-pressed={isActive}
-                >
-                  <span className="scenario-daily-tag">⭐ Today&rsquo;s pick</span>
-                  <span className="scenario-daily-emoji">{dp.emoji}</span>
-                  <span className="scenario-daily-label">{dp.label}</span>
-                </div>
-              );
-            })()}
-
-            {/* Free chat — standalone full-width */}
-            <button
-              className={`scenario-free-pill${scenario === 'free' ? ' active' : ''}`}
-              onClick={() => handleScenarioChange('free')}
-              aria-pressed={scenario === 'free'}
-            >
-              💬 Free conversation — talk about anything
-            </button>
-
-            {/* Categorized rows */}
-            {SCENARIO_CATEGORIES.map(cat => (
-              <div key={cat.label} className="scenario-category">
-                <p className="scenario-category-label">{cat.label}</p>
-                <div className="scenario-row">
-                  {cat.ids.map(id => {
-                    const s = SCENARIOS.find(x => x.id === id);
-                    if (!s) return null;
-                    return (
-                      <button
-                        key={id}
-                        className={`scenario-pill${scenario === id ? ' active' : ''}`}
-                        onClick={() => handleScenarioChange(id)}
-                        aria-pressed={scenario === id}
-                      >
-                        {s.emoji} {s.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-
-            {/* Custom — at the bottom */}
-            <button
-              className={`scenario-pill scenario-pill--custom${scenario === 'custom' ? ' active' : ''}`}
-              onClick={() => { setCustomDraft(customScenario); setShowCustomModal(true); }}
-            >
-              ✏️ Custom
-            </button>
-
-          </div>
+          <button className="scenario-trigger" onClick={() => setShowScenarioSheet(true)}>
+            {currentScenarioDisplay.emoji} {currentScenarioDisplay.label}
+          </button>
         )}
 
-        {/* Scenario hint — visible for 3s after session starts */}
+        {/* Session state — scenario hint badge */}
         {isSessionActive && showScenarioHint && (() => {
           if (scenario === 'custom') return <div className="scenario-hint">✏️ Custom mode</div>;
           const s = SCENARIOS.find(x => x.id === scenario);
           return s ? <div className="scenario-hint">{s.emoji} {s.label} mode</div> : null;
         })()}
+
+        {/* Thinking dots — above mic */}
+        {isThinking && (
+          <div className="thinking-dots" aria-label="Thinking">
+            <span /><span /><span />
+          </div>
+        )}
 
         {/* Suggestion chips — shown after 5s silence for beginners */}
         {showSuggestions && suggestions.length > 0 && isSessionActive && (
@@ -561,6 +520,7 @@ export default function App() {
           </div>
         )}
 
+        {/* ─── Mic button ─── */}
         <button
           className={`mic-btn mic-btn--${btnState}`}
           onClick={handleButtonClick}
@@ -577,7 +537,17 @@ export default function App() {
           </div>
         </button>
 
-        {btnState === STATE.IDLE && <p className="idle-tagline">Tap to start your session</p>}
+        {/* Home state — below mic */}
+        {!isSessionActive && (
+          <>
+            <p className="idle-tagline">Tap to speak in French</p>
+            <button className="scenario-change-link" onClick={() => setShowScenarioSheet(true)}>
+              📍 Change scenario
+            </button>
+          </>
+        )}
+
+        {/* Session state — status label */}
         {btnState !== STATE.IDLE && (
           <p className="state-label">
             {btnState === STATE.LISTENING && 'Listening...'}
@@ -585,20 +555,17 @@ export default function App() {
           </p>
         )}
 
-        {isThinking && (
-          <div className="thinking-dots" aria-label="Thinking">
-            <span /><span /><span />
-          </div>
-        )}
-
         {isSessionActive && remaining !== null && (
           <p className={`time-remaining${remaining < 120 ? ' time-remaining--danger' : remaining < 300 ? ' time-remaining--warning' : ''}`}>
             {formatTime(remaining)} remaining
           </p>
         )}
+
         {lastTranscript && <p className="transcript-bubble">&ldquo;{lastTranscript}&rdquo;</p>}
         {aiText         && <p className="ai-text-stream">{aiText}</p>}
         {error          && <p className="app-error">{error}</p>}
+
+        <div className="app-spacer" />
       </div>
 
       {isSessionActive && <p className="end-hint">Tap again to end session</p>}
@@ -625,6 +592,78 @@ export default function App() {
           )}
         </div>
       </div>
+
+      {/* ─── Scenario sheet ─── */}
+      {showScenarioSheet && (
+        <>
+          <div className="scenario-overlay" onClick={() => setShowScenarioSheet(false)} />
+          <div className="scenario-sheet" role="dialog" aria-label="Choose your scenario">
+            <div className="scenario-sheet-header">
+              <span className="scenario-sheet-title">Choose your scenario</span>
+              <button className="scenario-sheet-close" onClick={() => setShowScenarioSheet(false)} aria-label="Close">✕</button>
+            </div>
+
+            {/* Daily pick */}
+            {(() => {
+              const dp = SCENARIOS.find(s => s.id === DAILY_PICK_ID);
+              if (!dp) return null;
+              const isActive = scenario === DAILY_PICK_ID;
+              return (
+                <div
+                  className={`scenario-daily${isActive ? ' scenario-daily--active' : ''}`}
+                  onClick={() => handleScenarioSelect(DAILY_PICK_ID)}
+                  role="button"
+                  aria-pressed={isActive}
+                >
+                  <span className="scenario-daily-tag">⭐ Today&rsquo;s pick</span>
+                  <span className="scenario-daily-emoji">{dp.emoji}</span>
+                  <span className="scenario-daily-label">{dp.label}</span>
+                </div>
+              );
+            })()}
+
+            {/* Free chat */}
+            <button
+              className={`scenario-free-pill${scenario === 'free' ? ' active' : ''}`}
+              onClick={() => handleScenarioSelect('free')}
+              aria-pressed={scenario === 'free'}
+            >
+              💬 Free conversation — talk about anything
+            </button>
+
+            {/* Categorized rows */}
+            {SCENARIO_CATEGORIES.map(cat => (
+              <div key={cat.label} className="scenario-category">
+                <p className="scenario-category-label">{cat.label}</p>
+                <div className="scenario-row">
+                  {cat.ids.map(id => {
+                    const s = SCENARIOS.find(x => x.id === id);
+                    if (!s) return null;
+                    return (
+                      <button
+                        key={id}
+                        className={`scenario-pill${scenario === id ? ' active' : ''}`}
+                        onClick={() => handleScenarioSelect(id)}
+                        aria-pressed={scenario === id}
+                      >
+                        {s.emoji} {s.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {/* Custom */}
+            <button
+              className={`scenario-pill scenario-pill--custom${scenario === 'custom' ? ' active' : ''}`}
+              onClick={() => { setCustomDraft(customScenario); setShowCustomModal(true); setShowScenarioSheet(false); }}
+            >
+              ✏️ Custom
+            </button>
+          </div>
+        </>
+      )}
 
       {/* ─── Settings panel ─── */}
       <SettingsPanel
@@ -705,7 +744,6 @@ function SettingsPanel({ open, onClose, speed, onSpeedChange, corrMode, onCorrMo
 
         <div className="sp-body">
 
-          {/* Section 1 — Speaking mode */}
           <div className="sp-section">
             <p className="sp-label">Speaking mode</p>
             <div className="sp-toggle-row">
@@ -727,7 +765,6 @@ function SettingsPanel({ open, onClose, speed, onSpeedChange, corrMode, onCorrMo
             )}
           </div>
 
-          {/* Section 2 — Corrections */}
           <div className="sp-section">
             <p className="sp-label">Correction style</p>
             <div className="sp-options">
@@ -748,7 +785,6 @@ function SettingsPanel({ open, onClose, speed, onSpeedChange, corrMode, onCorrMo
             </div>
           </div>
 
-          {/* Section 3 — Speed */}
           <div className="sp-section">
             <p className="sp-label">Coach speaking speed</p>
             <div className="sp-options sp-options--row">
@@ -764,7 +800,6 @@ function SettingsPanel({ open, onClose, speed, onSpeedChange, corrMode, onCorrMo
             </div>
           </div>
 
-          {/* Section 4 — Level */}
           <div className="sp-section">
             <p className="sp-label">French level</p>
             <p className="sp-sublabel">Auto-detected by default</p>
@@ -782,7 +817,6 @@ function SettingsPanel({ open, onClose, speed, onSpeedChange, corrMode, onCorrMo
             </div>
           </div>
 
-          {/* Section 5 — English help */}
           <div className="sp-section">
             <p className="sp-label">In-session help</p>
             <div className="sp-toggle-row">

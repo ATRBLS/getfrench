@@ -62,6 +62,14 @@
   white-space: nowrap;
 }
 
+/* Confidence row — centered below header */
+.confidence-row {
+  display: flex;
+  justify-content: center;
+  padding: 0 20px 4px;
+  flex-shrink: 0;
+}
+
 /* Settings button */
 .settings-btn-wrap {
   position: relative;
@@ -116,8 +124,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 24px;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.app-spacer {
+  flex: 1;
 }
 
 /* ─── Mic button ─── */
@@ -189,7 +201,12 @@
 .state-label {
   font-size: 14px; color: var(--muted); letter-spacing: 0.01em; height: 20px;
 }
-.idle-tagline { font-size: 14px; color: var(--muted); letter-spacing: 0.01em; }
+.idle-tagline {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+  margin-top: 12px;
+}
 
 .transcript-bubble {
   font-size: 15px; color: var(--foreground); font-style: italic;
@@ -217,15 +234,101 @@
 
 .app-error { font-size: 13px; color: #e53935; }
 
-/* ─── Scenario selector ─── */
+/* ─── Scenario trigger (home state pill above mic) ─── */
 
-.scenario-selector {
+.scenario-trigger {
   display: flex;
-  flex-direction: column;
-  width: 100%;
-  max-width: 420px;
-  padding: 0 4px;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #0055A4;
+  font-weight: 600;
+  background: rgba(0,85,164,0.06);
+  border: none;
+  padding: 6px 14px;
+  border-radius: 50px;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
 }
+.scenario-trigger:active { background: rgba(0,85,164,0.12); }
+
+/* ─── Change scenario link (below mic) ─── */
+
+.scenario-change-link {
+  font-size: 13px;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  margin-top: 4px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.scenario-change-link:active { color: var(--foreground); }
+
+/* ─── Scenario sheet overlay ─── */
+
+.scenario-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 99;
+}
+
+/* ─── Scenario bottom sheet ─── */
+
+.scenario-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 75vh;
+  background: white;
+  border-radius: 20px 20px 0 0;
+  padding: 20px 16px max(32px, calc(16px + env(safe-area-inset-bottom)));
+  overflow-y: auto;
+  z-index: 100;
+  animation: slideUp 0.3s ease;
+  -webkit-overflow-scrolling: touch;
+}
+
+.scenario-sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.scenario-sheet-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #001858;
+}
+
+.scenario-sheet-close {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,24,88,0.08);
+  border-radius: 50%;
+  font-size: 14px;
+  color: var(--foreground);
+  touch-action: manipulation;
+  flex-shrink: 0;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* ─── Scenario content (inside sheet) ─── */
 
 /* Daily pick card */
 .scenario-daily {
@@ -337,6 +440,7 @@
 
 .scenario-pill--custom {
   border-style: dashed;
+  margin-top: 14px;
 }
 
 .scenario-hint {
