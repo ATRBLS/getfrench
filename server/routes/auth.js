@@ -96,7 +96,7 @@ router.post('/magic-link', async (req, res) => {
     const link = `${frontendUrl}/auth?token=${token}`;
 
     const { data, error } = await getResend().emails.send({
-      from: 'GetFrench <onboarding@resend.dev>',
+      from: 'GetFrench <hello@getfrench.app>',
       to: email,
       subject: 'Your GetFrench login link',
       html: `
