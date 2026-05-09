@@ -4,7 +4,9 @@ const jwt = require('jsonwebtoken');
 const ALLOWED_ORIGINS = [
   'http://localhost:5173', 'http://localhost:5174',
   'http://localhost:5175', 'http://localhost:5176',
-  'https://speakr-two.vercel.app',
+  'https://getfrench.app',
+  'https://www.getfrench.app',
+  'https://getfrench.vercel.app', // keep during DNS propagation
 ];
 if (process.env.FRONTEND_URL) ALLOWED_ORIGINS.push(process.env.FRONTEND_URL);
 
