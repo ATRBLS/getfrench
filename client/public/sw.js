@@ -1,4 +1,4 @@
-const CACHE = 'getfrench-v2';
+const CACHE = 'getfrench-v3';
 const SHELL = [
   '/app',
   '/auth',
