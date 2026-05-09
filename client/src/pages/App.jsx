@@ -131,16 +131,6 @@ export default function App() {
 
   const { enqueueSentence, finalize, cancel: cancelSpeech, createAudioSession, closeAudioSession } = useSpeechSynthesis();
 
-  useEffect(() => {
-    const speedMap = { slow: 0.72, normal: 1.0, fast: 1.35 };
-    window.__gfSpeed = speedMap[readLS('getfrench_speed', 'normal')] || 1.0;
-    const orig = AudioBufferSourceNode.prototype.start;
-    AudioBufferSourceNode.prototype.start = function (...args) {
-      if (window.__gfSpeed !== 1.0) this.playbackRate.value = window.__gfSpeed;
-      return orig.apply(this, args);
-    };
-    return () => { AudioBufferSourceNode.prototype.start = orig; delete window.__gfSpeed; };
-  }, []);
 
   useEffect(() => {
     if (!isAuthenticated()) { navigate('/auth', { replace: true }); return; }
@@ -395,8 +385,8 @@ export default function App() {
 
   const handleSpeedChange = (v) => {
     setSpeed(v); localStorage.setItem('getfrench_speed', v);
-    const map = { slow: 0.72, normal: 1.0, fast: 1.35 };
-    window.__gfSpeed = map[v];
+    const map = { slow: 0.7, normal: 1.0, fast: 1.2 };
+    api.setTtsSpeed(map[v]).catch(() => {});
   };
   const handleCorrModeChange = (v) => {
     setCorrMode(v); corrModeRef.current = v; localStorage.setItem('getfrench_corrmode', v);
