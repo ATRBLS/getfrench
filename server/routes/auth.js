@@ -91,9 +91,10 @@ router.post('/magic-link', async (req, res) => {
 
     console.log('Attempting to send email to:', email);
 
-    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '15m' });
-    const frontendUrl = process.env.FRONTEND_URL || process.env.VITE_APP_URL;
+    const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const frontendUrl = process.env.FRONTEND_URL || 'https://getfrench.app';
     const link = `${frontendUrl}/auth?token=${token}`;
+    console.log('[MagicLink] link generated for:', email, '| frontendUrl:', frontendUrl);
 
     const { data, error } = await getResend().emails.send({
       from: 'GetFrench <hello@getfrench.app>',
@@ -125,11 +126,22 @@ router.post('/magic-link', async (req, res) => {
 router.post('/verify', async (req, res) => {
   try {
     const { token } = req.body;
-    const { email } = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('[MagicLink] received token:', token?.slice(0, 20), '| JWT_SECRET set:', !!process.env.JWT_SECRET);
+    if (!token) return res.status(400).json({ error: 'Token missing' });
+    let payload;
+    try {
+      payload = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (jwtErr) {
+      console.error('[MagicLink] JWT verify failed:', jwtErr.message);
+      const msg = jwtErr.name === 'TokenExpiredError' ? 'Link expired' : 'Invalid link';
+      return res.status(400).json({ error: msg });
+    }
+    const { email } = payload;
+    console.log('[MagicLink] verified email:', email);
     const user = await upsertUser({ email });
     res.json({ token: makeJWT(user), user });
   } catch (err) {
-    console.error('Verify error:', err);
+    console.error('[MagicLink] verify error:', err.message);
     res.status(400).json({ error: 'Invalid or expired link' });
   }
 });

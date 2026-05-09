@@ -22,13 +22,20 @@ export default function Auth() {
 
     // Handle magic link verification
     const token = searchParams.get('token');
+    console.log('[MagicLink] token from URL:', token ? token.slice(0, 20) + '…' : 'none');
     if (token) {
+      console.log('[MagicLink] calling verify...');
       api.verifyMagicLink(token)
         .then(({ token: jwt, user }) => {
+          console.log('[MagicLink] verified, user:', user?.email);
           saveAuth(jwt, user);
           navigate('/app', { replace: true });
         })
-        .catch(() => { setSigningIn(false); setError('This link has expired. Please try again.'); });
+        .catch((err) => {
+          console.error('[MagicLink] verify failed:', err?.message, err?.status);
+          setSigningIn(false);
+          setError('This link has expired or is invalid. Please request a new one.');
+        });
     }
 
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
