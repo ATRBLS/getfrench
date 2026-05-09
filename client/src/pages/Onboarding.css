@@ -332,77 +332,22 @@
 
 /* ─── Mini session (S15) ─── */
 
-.o-mini-q {
+.o-comprehension-block {
   width: 100%;
   background: white;
   border: 1.5px solid rgba(0,24,88,0.1);
   border-radius: 16px;
-  padding: 18px 20px;
-  text-align: left;
-}
-
-.o-mini-label {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: rgba(0,24,88,0.3);
+  padding: 20px 20px;
   margin-bottom: 8px;
 }
 
-.o-mini-text {
+.o-comprehension-text {
   font-size: 17px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--foreground);
-  line-height: 1.4;
-}
-
-.o-mic-btn {
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-  background: var(--primary);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 8px 28px rgba(245,130,174,0.42);
-  transition: transform 0.12s;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-  flex-shrink: 0;
-}
-.o-mic-btn:active { transform: scale(0.93); }
-.o-mic-btn--on {
-  background: #e8548e;
-  animation: o-mic-pulse 1.2s ease-in-out infinite;
-}
-@keyframes o-mic-pulse {
-  0%,100% { box-shadow: 0 0 0 0px rgba(245,130,174,0.3), 0 8px 28px rgba(245,130,174,0.42); }
-  50%      { box-shadow: 0 0 0 16px rgba(245,130,174,0.1), 0 8px 28px rgba(245,130,174,0.42); }
-}
-
-.o-mini-hint {
-  font-size: 13px;
-  color: rgba(0,24,88,0.4);
+  line-height: 1.6;
   font-style: italic;
 }
-
-.o-mini-bubble {
-  width: 100%;
-  border-radius: 14px;
-  padding: 14px 18px;
-  text-align: left;
-  animation: o-enter 0.3s ease;
-}
-.o-mini-bubble p:last-child {
-  font-size: 15px;
-  color: var(--foreground);
-  line-height: 1.55;
-  margin-top: 6px;
-}
-.o-mini-bubble--user { background: white; border: 1.5px solid rgba(0,24,88,0.08); }
-.o-mini-bubble--coach { background: rgba(245,130,174,0.08); border: 1.5px solid rgba(245,130,174,0.25); }
 
 /* ─── Level badge (S16) ─── */
 

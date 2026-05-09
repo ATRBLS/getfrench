@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { isAuthenticated } from '../lib/auth';
-import { useSpeechRecognition } from '../hooks/useSpeech';
 import Logo from '../components/Logo';
 import './Onboarding.css';
 
@@ -366,119 +365,49 @@ function S14({ next }) {
   );
 }
 
-// ─── Screen 15 — Mini session ──────────────────────────────────────
+// ─── Screen 15 — Comprehension check ──────────────────────────────
 
-const MINI_Q = {
-  A1: 'Bonjour! Comment tu t\'appelles?',
-  A2: 'Bonjour! Comment tu t\'appelles?',
-  B1: 'Bonjour! Comment s\'est passée ta journée?',
-  B2: 'Bonjour! Comment s\'est passée ta journée?',
-  C1: 'Bonjour! Qu\'est-ce qui vous a amené à apprendre le français?',
-};
-const MINI_R = {
-  A1: "C'est très bien! Vous avez fait un grand pas aujourd'hui. Continuez!",
-  A2: 'Bravo! Vous vous en sortez très bien pour votre niveau.',
-  B1: "Excellent! Votre français est déjà bien solide. On continue!",
-  B2: "Impressionnant! Vous parlez avec beaucoup d'aisance.",
-  C1: 'Remarquable! Votre maîtrise du français est évidente.',
+const COMPREHENSION = {
+  A1: "Bonjour! Je m'appelle Marie. J'ai 30 ans et j'habite à Montréal. J'aime le café et la musique.",
+  A2: "Ce matin, je suis allé au marché du quartier. J'ai acheté des légumes frais et du pain. Le vendeur était très sympa et m'a donné une recette.",
+  B1: "Depuis que j'habite au Québec, j'essaie de parler français chaque jour. C'est parfois difficile, surtout quand les gens parlent vite ou utilisent des expressions locales, mais je progresse vraiment.",
+  B2: "L'apprentissage d'une langue ne se limite pas à la grammaire — c'est avant tout une immersion dans une culture, une façon de penser le monde différemment et de nouer des liens autrement.",
+  C1: "La vitalité du français québécois tient à ses expressions idiomatiques héritées du 17e siècle et à ses emprunts créatifs à l'anglais, témoignant d'une évolution linguistique autonome et d'une identité culturelle affirmée.",
 };
 
-function S15({ next, answers, name }) {
-  const level = answers.level || 'B1';
-  const [phase, setPhase] = useState('idle'); // idle | listening | thinking | done
-  const phaseRef = useRef('idle');
-  const [transcript, setTranscript] = useState('');
-  const bufRef = useRef('');
-  const stopRef = useRef(null);
+const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
-  const setP = (p) => { phaseRef.current = p; setPhase(p); };
+function adjustLevel(base, answer) {
+  const delta = { 'Crystal clear': 1, 'Mostly clear': 0, 'Somewhat lost': -1, 'Very lost': -2 }[answer] ?? 0;
+  const idx = Math.max(0, Math.min(LEVELS.length - 1, LEVELS.indexOf(base) + delta));
+  return LEVELS[idx];
+}
 
-  const finish = useCallback(() => {
-    setP('thinking');
-    setTimeout(() => setP('done'), 1400);
-  }, []);
+function S15({ next, answers, setDetectedLevel }) {
+  const base = answers.level || 'B1';
+  const [picked, setPicked] = useState(false);
 
-  const { start: startSTT, stop: stopSTT } = useSpeechRecognition({
-    onResult: t => {
-      bufRef.current += (bufRef.current ? ' ' : '') + t;
-      setTranscript(bufRef.current);
-    },
-    onEnd: () => { if (phaseRef.current === 'listening') finish(); },
-    onError: () => { if (phaseRef.current === 'listening') finish(); },
-  });
-  stopRef.current = stopSTT;
-
-  const handleMic = () => {
-    if (phaseRef.current === 'idle') {
-      bufRef.current = '';
-      setTranscript('');
-      setP('listening');
-      startSTT();
-      setTimeout(() => { if (phaseRef.current === 'listening') { stopRef.current?.(); } }, 30000);
-    } else if (phaseRef.current === 'listening') {
-      stopSTT();
-      finish();
-    }
+  const handleAnswer = (answer) => {
+    if (picked) return;
+    setPicked(true);
+    setDetectedLevel(adjustLevel(base, answer));
+    setTimeout(next, 500);
   };
 
   return (
-    <div className="o-body o-body--center">
-      <h2 className="o-title">{name}, let&rsquo;s hear your French.</h2>
-      <p className="o-body-small">30 seconds. No judgment. Just speak naturally.</p>
-
-      <div className="o-mini-q">
-        <p className="o-mini-label">Your coach asks:</p>
-        <p className="o-mini-text">&ldquo;{MINI_Q[level] || MINI_Q.B1}&rdquo;</p>
+    <div className="o-body">
+      <h2 className="o-title">Read this.</h2>
+      <div className="o-comprehension-block">
+        <p className="o-comprehension-text">{COMPREHENSION[base] || COMPREHENSION.B1}</p>
       </div>
-
-      {phase !== 'thinking' && phase !== 'done' && (
-        <button
-          className={`o-mic-btn${phase === 'listening' ? ' o-mic-btn--on' : ''}`}
-          onClick={handleMic}
-        >
-          <MicSVG />
-        </button>
-      )}
-
-      {phase === 'idle' && <p className="o-mini-hint">Tap the mic to respond</p>}
-      {phase === 'listening' && <p className="o-mini-hint">Listening... tap again to stop</p>}
-      {phase === 'thinking' && <p className="o-mini-hint">Your coach is thinking...</p>}
-
-      {transcript && phase !== 'idle' && (
-        <div className="o-mini-bubble o-mini-bubble--user">
-          <p className="o-mini-label">You said:</p>
-          <p>&ldquo;{transcript}&rdquo;</p>
-        </div>
-      )}
-
-      {phase === 'done' && (
-        <>
-          <div className="o-mini-bubble o-mini-bubble--coach">
-            <p className="o-mini-label">Your coach:</p>
-            <p>&ldquo;{MINI_R[level] || MINI_R.B1}&rdquo;</p>
-          </div>
-          <button className="o-btn" onClick={next}>See your results →</button>
-        </>
-      )}
-
-      {phase === 'idle' && (
-        <button className="o-ghost" style={{ marginTop: 8 }} onClick={next}>
-          Skip for now
-        </button>
-      )}
+      <p className="o-body-small" style={{ textAlign: 'center', marginBottom: 16 }}>
+        How much did you understand?
+      </p>
+      <Cards
+        options={['Crystal clear', 'Mostly clear', 'Somewhat lost', 'Very lost']}
+        onSelect={handleAnswer}
+      />
     </div>
-  );
-}
-
-function MicSVG() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-      <line x1="12" y1="19" x2="12" y2="23" />
-      <line x1="8" y1="23" x2="16" y2="23" />
-    </svg>
   );
 }
 
@@ -497,9 +426,9 @@ function S16({ next, detectedLevel }) {
   return (
     <div className="o-body o-body--center">
       <div className="o-level-badge">{lvl}</div>
-      <h2 className="o-title">Your coach detected: {lvl}</h2>
+      <h2 className="o-title">Your level: {lvl}</h2>
       <p className="o-body-text" style={{ textAlign: 'center' }}>
-        You&rsquo;re further along than you think.
+        Based on what you understood.
       </p>
       <p className="o-body-small" style={{ textAlign: 'center' }}>
         {LEVEL_NOTE[lvl] || LEVEL_NOTE.B1}
@@ -674,7 +603,7 @@ export default function Onboarding() {
     12: <S12 next={next} />,
     13: <S13 next={next} set={set} />,
     14: <S14 next={next} />,
-    15: <S15 next={next} answers={answers} name={name} setDetectedLevel={setDetectedLevel} />,
+    15: <S15 next={next} answers={answers} setDetectedLevel={setDetectedLevel} />,
     16: <S16 next={next} detectedLevel={detected} />,
     17: <S17 next={next} />,
     18: <S18 next={next} answers={answers} name={name} detectedLevel={detected} />,
