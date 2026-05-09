@@ -11,7 +11,7 @@ export default function Auth() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
-  const [signingIn, setSigningIn] = useState(false);
+  const [signingIn, setSigningIn] = useState(() => !!searchParams.get('token'));
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export default function Auth() {
           saveAuth(jwt, user);
           navigate('/app', { replace: true });
         })
-        .catch(() => setError('This link has expired. Please try again.'));
+        .catch(() => { setSigningIn(false); setError('This link has expired. Please try again.'); });
     }
 
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
