@@ -588,10 +588,10 @@ function S19({ next }) {
 // ─── Screen 20 — Paywall ───────────────────────────────────────────
 
 const PLANS20 = [
-  { id: 'free',    name: 'Free',    price: null, desc: '3 sessions to start' },
-  { id: 'starter', name: 'Starter', price: 9.99,  desc: '4 hours / month' },
-  { id: 'pro',     name: 'Pro',     price: 19.99, desc: '10 hours / month', popular: true },
-  { id: 'max',     name: 'Max',     price: 39.99, desc: '20 hours / month' },
+  { id: 'free',    name: 'Free',    yearly: null,  monthly: null,  hours: null, sessions: 3,  feature: 'No credit card needed' },
+  { id: 'starter', name: 'Starter', yearly: 9.99,  monthly: 12.99, hours: 4,                  feature: 'Casual learners' },
+  { id: 'pro',     name: 'Pro',     yearly: 19.99, monthly: 23.99, hours: 10,                 feature: 'Best for progress', popular: true },
+  { id: 'max',     name: 'Max',     yearly: 39.99, monthly: 44.99, hours: 20,                 feature: 'Maximum practice' },
 ];
 
 function S20({ navigate, name }) {
@@ -614,16 +614,25 @@ function S20({ navigate, name }) {
           <div key={p.id} className={`o-price-card${p.popular ? ' o-price-card--pop' : ''}`}>
             {p.popular && <span className="o-pop-tag">Most Popular</span>}
             <p className="o-price-name">{p.name}</p>
-            <p className="o-price-amt">{p.price ? `$${p.price}/mo` : 'Free'}</p>
-            <p className="o-price-desc">{p.desc}</p>
+            <p className="o-price-amt">
+              {p.yearly ? `$${p.yearly}/mo` : 'Free'}
+            </p>
+            {p.monthly && (
+              <p className="o-price-monthly">${p.monthly} without commitment</p>
+            )}
+            <p className="o-price-desc">
+              {p.hours ? `${p.hours}h / month` : '3 sessions to start'}
+            </p>
+            <p className="o-price-feature">{p.feature}</p>
+            <button className="o-price-cta" onClick={() => navigate('/auth')}>
+              Get started →
+            </button>
           </div>
         ))}
       </div>
       <p className="o-body-small" style={{ textAlign: 'center' }}>
-        Start with 3 free sessions. No credit card required.
+        Yearly pricing shown. No credit card required to start.
       </p>
-      <button className="o-btn" onClick={() => navigate('/auth')}>Start for free →</button>
-      <button className="o-ghost" onClick={() => navigate('/')}>See pricing details</button>
     </div>
   );
 }

@@ -534,3 +534,34 @@
   font-size: 11px;
   color: rgba(0,24,88,0.45);
 }
+.o-price-monthly {
+  font-size: 10px;
+  color: rgba(0,24,88,0.35);
+  margin-bottom: 4px;
+  text-decoration: line-through;
+}
+.o-price-feature {
+  font-size: 11px;
+  color: rgba(0,24,88,0.55);
+  font-style: italic;
+  margin-top: 3px;
+}
+.o-price-cta {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  padding: 8px 0;
+  background: #0055A4;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-align: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+.o-price-card--pop .o-price-cta {
+  background: var(--gradient-coral);
+}
+.o-price-cta:active { opacity: 0.8; }
