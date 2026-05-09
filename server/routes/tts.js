@@ -5,7 +5,7 @@ const supabase = require('../lib/supabase');
 
 const router = express.Router();
 
-const VOICE_ID = 'O31r762Gb3WFygrEOGh0'; // Victoria — young, fluid, Parisian French female
+const VOICE_ID = 'MNKK2Wl2wbbsEPQTHZGt';
 
 // Cache-aside: Map for fast access, Supabase for persistence across restarts.
 const speedCache = new Map();
