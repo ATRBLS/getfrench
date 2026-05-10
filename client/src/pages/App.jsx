@@ -134,14 +134,25 @@ export default function App() {
 
   useEffect(() => {
     if (!isAuthenticated()) { navigate('/auth', { replace: true }); return; }
-    api.getMe().then(user => {
-      setUserData(user);
-      setStreak(user.streak_count || 0);
-      if (user.memory && Object.keys(user.memory).length > 0) setShowMemoryDot(true);
-    }).catch(err => {
-      if (err.status === 401) { clearAuth(); navigate('/auth', { replace: true }); }
-      else { setError('Could not load your account. Check your connection and reload.'); }
-    });
+
+    const justUpgraded = searchParams.get('upgraded') === 'true';
+
+    const loadUser = (attempt = 0) => {
+      api.getMe().then(user => {
+        setUserData(user);
+        setStreak(user.streak_count || 0);
+        if (user.memory && Object.keys(user.memory).length > 0) setShowMemoryDot(true);
+        // If returning from Stripe but plan is still free, poll until webhook fires (max 15s)
+        if (justUpgraded && user.plan === 'free' && attempt < 7) {
+          setTimeout(() => loadUser(attempt + 1), 2000);
+        }
+      }).catch(err => {
+        if (err.status === 401) { clearAuth(); navigate('/auth', { replace: true }); }
+        else { setError('Could not load your account. Check your connection and reload.'); }
+      });
+    };
+
+    loadUser();
   }, [navigate, searchParams]);
 
   const formatTime = (seconds) => {
