@@ -147,7 +147,7 @@ export function useSpeechSynthesis() {
         if (!ctx) throw new Error('no AudioContext');
         return ctx.decodeAudioData(arrayBuffer);
       })
-      .then(audioBuffer => {
+      .then(async audioBuffer => {
         if (gen !== genRef.current) return;
         const ctx = audioCtxRef.current;
         if (!ctx) return;
@@ -163,6 +163,13 @@ export function useSpeechSynthesis() {
           currentRef.current = null;
           playNext(gen);
         };
+
+        // iOS Safari suspends the AudioContext after the async gap between
+        // createAudioSession() and the first actual audio playback. Resume it
+        // so the first TTS response is audible (not silently dropped).
+        if (ctx.state === 'suspended') {
+          try { await ctx.resume(); } catch {}
+        }
         source.start(0);
       })
       .catch((err) => {

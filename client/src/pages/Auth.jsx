@@ -15,12 +15,8 @@ export default function Auth() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (isAuthenticated()) {
-      navigate('/app', { replace: true });
-      return;
-    }
-
-    // Handle magic link verification
+    // Magic link token MUST be checked first — it overrides any existing session.
+    // Checking isAuthenticated() first caused user B's magic link to log in as user A.
     const token = searchParams.get('token');
     console.log('[MagicLink] token from URL:', token ? token.slice(0, 20) + '…' : 'none');
     if (token) {
@@ -28,7 +24,7 @@ export default function Auth() {
       api.verifyMagicLink(token)
         .then(({ token: jwt, user }) => {
           console.log('[MagicLink] verified, user:', user?.email);
-          saveAuth(jwt, user);
+          saveAuth(jwt, user); // overwrites any existing session
           navigate('/app', { replace: true });
         })
         .catch((err) => {
@@ -36,6 +32,12 @@ export default function Auth() {
           setSigningIn(false);
           setError('This link has expired or is invalid. Please request a new one.');
         });
+      return; // don't load Google SDK while processing magic link
+    }
+
+    if (isAuthenticated()) {
+      navigate('/app', { replace: true });
+      return;
     }
 
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
