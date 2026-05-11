@@ -256,6 +256,36 @@
 
 /* ─── Change scenario link (below mic) ─── */
 
+/* ─── Recap loading label ─── */
+.recap-loading-label {
+  font-size: 13px;
+  color: var(--muted);
+  letter-spacing: 0.01em;
+  margin-top: 12px;
+  animation: fade-in 0.3s ease;
+}
+
+/* ─── Help-once button ─── */
+.help-once-btn {
+  font-size: 13px;
+  color: var(--muted);
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 50px;
+  padding: 6px 14px;
+  cursor: pointer;
+  margin-top: 8px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.help-once-btn--active {
+  color: #0055A4;
+  border-color: #0055A4;
+  background: rgba(0,85,164,0.06);
+}
+.help-once-btn:active { opacity: 0.75; }
+
 .scenario-change-link {
   font-size: 13px;
   color: var(--muted);

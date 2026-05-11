@@ -89,11 +89,14 @@ export default function App() {
   const [showLowTime, setShowLowTime] = useState(false);
   const [showRecap, setShowRecap] = useState(false);
   const [recapData, setRecapData] = useState(null);
+  const [recapLoading, setRecapLoading] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [streak, setStreak] = useState(0);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [helpOnceActive, setHelpOnceActive] = useState(false);
+  const helpOnceRef = useRef(false);
   const silenceTimerRef = useRef(null);
   const [scenario, setScenario] = useState('free');
   const [showScenarioHint, setShowScenarioHint] = useState(false);
@@ -201,6 +204,8 @@ export default function App() {
     const sessionMinutes = Math.floor(duration / 60);
     const durationLabel = sessionMinutes < 5 ? 'Quick practice' : sessionMinutes <= 10 ? 'Good session' : 'Deep practice';
 
+    setRecapLoading(true);
+
     try {
       const summary = await api.summarize({ messages: currentMessages, existing_memory: savedUserData?.memory });
       summary.total_minutes = (savedUserData?.memory?.total_minutes || 0) + sessionMinutes;
@@ -212,10 +217,8 @@ export default function App() {
       setUserData(prev => ({ ...prev, memory: summary }));
       setShowMemoryDot(true);
       setRecapData(summary);
-      setShowRecap(true);
     } catch (err) {
       console.error('Failed to save session:', err);
-      // Save session without summary, and show a minimal recap
       const endResult = await api.endSession({ session_id: savedSessionId, duration_seconds: duration }).catch(() => null);
       const newStreak = endResult?.streak_count || streak;
       setStreak(newStreak);
@@ -224,6 +227,8 @@ export default function App() {
         streak_count: newStreak,
         encouragement: 'Session terminée ! Continue comme ça. 💪',
       });
+    } finally {
+      setRecapLoading(false);
       setShowRecap(true);
     }
   }, [sessionId, userData, streak, cancelSpeech, closeAudioSession]);
@@ -234,6 +239,10 @@ export default function App() {
     clearTimeout(sttDebounceRef.current);
     sttDebounceRef.current = null;
     setBtnState(STATE.THINKING);
+
+    // Consume helpOnce — reset immediately so only one response is in English
+    const usingHelpOnce = helpOnceRef.current;
+    if (usingHelpOnce) { helpOnceRef.current = false; setHelpOnceActive(false); }
 
     const newMessages = [...messagesRef.current, { role: 'user', content: userTranscript }];
     messagesRef.current = newMessages;
@@ -267,7 +276,7 @@ export default function App() {
       await streamMessage(
         newMessages, sessionId,
         corrModeRef.current, levelModeRef.current,
-        crosstalkRef.current, helpModeRef.current,
+        crosstalkRef.current, helpModeRef.current || usingHelpOnce,
         scenarioRef.current, customScenarioRef.current,
         (chunk) => { fullResponse += chunk; sentenceBuffer += chunk; setAiText(fullResponse); flushSentences(); }
       );
@@ -543,15 +552,16 @@ export default function App() {
 
         {/* ─── Mic button ─── */}
         <button
-          className={`mic-btn mic-btn--${btnState}`}
-          onClick={handleButtonClick}
+          className={`mic-btn mic-btn--${recapLoading ? 'thinking' : btnState}`}
+          onClick={recapLoading ? undefined : handleButtonClick}
+          disabled={recapLoading}
           aria-label={isSessionActive ? 'End session' : 'Start session'}
         >
           <div className="mic-rings">
             <div className="ring ring-1" /><div className="ring ring-2" /><div className="ring ring-3" />
           </div>
           <div className="mic-inner">
-            {!userData && !isSessionActive ? <Spinner /> : (
+            {(recapLoading || (!userData && !isSessionActive)) ? <Spinner /> : (
               <>
                 {btnState === STATE.IDLE      && <MicIcon />}
                 {btnState === STATE.LISTENING && <MicIcon />}
@@ -562,8 +572,23 @@ export default function App() {
           </div>
         </button>
 
+        {/* Recap loading indicator */}
+        {recapLoading && (
+          <p className="recap-loading-label">Saving your session…</p>
+        )}
+
+        {/* Help-once button — only during active listening */}
+        {isSessionActive && btnState === STATE.LISTENING && !recapLoading && (
+          <button
+            className={`help-once-btn${helpOnceActive ? ' help-once-btn--active' : ''}`}
+            onClick={() => { helpOnceRef.current = true; setHelpOnceActive(true); }}
+          >
+            {helpOnceActive ? '🇬🇧 English reply ready' : '? Ask in English'}
+          </button>
+        )}
+
         {/* Home state — below mic */}
-        {!isSessionActive && (
+        {!isSessionActive && !recapLoading && (
           <>
             <p className="idle-tagline">{userData ? 'Tap to speak in French' : 'Loading…'}</p>
             <button className="scenario-change-link" onClick={() => setShowScenarioSheet(true)}>
