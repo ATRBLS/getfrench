@@ -134,6 +134,18 @@ export default function App() {
 
   const { enqueueSentence, finalize, cancel: cancelSpeech, createAudioSession, closeAudioSession } = useSpeechSynthesis();
 
+  // Client-side speed via playbackRate — primary mechanism since it's guaranteed to work.
+  // Values are moderate (±18%) to avoid the chipmunk effect of the previous ±35%.
+  useEffect(() => {
+    const speedMap = { slow: 0.82, normal: 1.0, fast: 1.18 };
+    window.__gfSpeed = speedMap[readLS('getfrench_speed', 'normal')] || 1.0;
+    const orig = AudioBufferSourceNode.prototype.start;
+    AudioBufferSourceNode.prototype.start = function (...args) {
+      if (window.__gfSpeed !== 1.0) this.playbackRate.value = window.__gfSpeed;
+      return orig.apply(this, args);
+    };
+    return () => { AudioBufferSourceNode.prototype.start = orig; delete window.__gfSpeed; };
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated()) { navigate('/auth', { replace: true }); return; }
@@ -405,8 +417,10 @@ export default function App() {
 
   const handleSpeedChange = (v) => {
     setSpeed(v); localStorage.setItem('getfrench_speed', v);
-    const map = { slow: 0.7, normal: 1.0, fast: 1.2 };
-    api.setTtsSpeed(map[v]).catch(() => {});
+    const rateMap = { slow: 0.82, normal: 1.0, fast: 1.18 };
+    window.__gfSpeed = rateMap[v];
+    const elevenMap = { slow: 0.7, normal: 1.0, fast: 1.2 };
+    api.setTtsSpeed(elevenMap[v]).catch(() => {});
   };
   const handleCorrModeChange = (v) => {
     setCorrMode(v); corrModeRef.current = v; localStorage.setItem('getfrench_corrmode', v);

@@ -10,12 +10,8 @@ const VOICE_ID = 'MNKK2Wl2wbbsEPQTHZGt';
 // Cache-aside: Map for fast access, Supabase for persistence across restarts.
 const speedCache = new Map();
 
-function cefrToSpeed(level) {
-  if (!level) return 1.0;
-  const l = level.toUpperCase();
-  if (l === 'A1' || l === 'A2') return 0.85;
-  if (l === 'C1' || l === 'C2') return 1.1;
-  return 1.0;
+function cefrToSpeed() {
+  return 1.0; // Speed is user-controlled via settings, not auto-adjusted by CEFR
 }
 
 // POST /api/tts/set-speed
