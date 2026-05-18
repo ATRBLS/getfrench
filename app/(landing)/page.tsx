@@ -1,12 +1,18 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { HeroCTA, NavAuthButtons, FinalCTA } from "@/components/landing/AuthCTA";
+import { t, type Lang } from "@/lib/translations";
 import {
-  Zap, CheckCircle2, Clock, Shield, Plug, Code2, Github, Star,
+  Zap, CheckCircle2, Clock, Shield, Plug, Code2, Github, Star, ChevronRight, ArrowRight,
 } from "lucide-react";
+
+const FEATURE_ICONS = [Zap, Shield, Plug, Code2, Clock, Github];
 
 const SERVICES = [
   { name: "Vercel", color: "text-white", bg: "bg-white/10" },
@@ -23,50 +29,31 @@ const SERVICES = [
   { name: "ElevenLabs", color: "text-yellow-400", bg: "bg-yellow-500/10" },
 ];
 
-const STEPS = [
-  { num: "01", title: "Connecte tes comptes", desc: "OAuth ou API key — une fois pour toutes." },
-  { num: "02", title: "Donne un nom au projet", desc: "C'est tout ce qu'on te demande." },
-  { num: "03", title: "On crée tout", desc: "Repos, bases de données, webhooks, env vars — automatiquement." },
-  { num: "04", title: "Récupère ton .env", desc: "Chiffré, prêt à coller dans Claude Code ou ton IDE." },
-];
+function LangToggle({ lang, setLang }: { lang: Lang; setLang: (l: Lang) => void }) {
+  return (
+    <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
+      <button
+        onClick={() => setLang("en")}
+        className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+          lang === "en" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+        }`}
+      >
+        EN
+      </button>
+      <button
+        onClick={() => setLang("fr")}
+        className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
+          lang === "fr" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+        }`}
+      >
+        FR
+      </button>
+    </div>
+  );
+}
 
-const FEATURES = [
-  { icon: Zap, title: "Création 1-clic", desc: "Plus jamais de copier-coller entre 10 dashboards. Tout est wired automatiquement." },
-  { icon: Shield, title: "Chiffrement AES-256", desc: "Tes tokens ne sont jamais en clair. Chiffrement GCM côté serveur, révélation à la demande." },
-  { icon: Plug, title: "Liens automatiques", desc: "Supabase injecté dans Vercel, webhook Stripe configuré, GitHub connecté au déploiement." },
-  { icon: Code2, title: ".env prêt pour Claude Code", desc: "Copie-colle directement dans ton projet. Compatible Claude Code, Cursor, Windsurf." },
-  { icon: Clock, title: "2h → 2 minutes", desc: "Ce qui prenait une demi-journée se fait pendant un café." },
-  { icon: Github, title: "Boilerplate inclus", desc: "Repo GitHub créé, README et .gitignore poussés, auto-deploy Vercel activé." },
-];
-
-const PLANS = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "/toujours",
-    desc: "Pour tester StackLaunch",
-    features: ["1 projet", "5 services max", "Export .env", "Chiffrement inclus"],
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: "$29",
-    period: "/mois",
-    desc: "Pour les fondateurs sérieux",
-    features: ["Projets illimités", "Tous les services", "Sync GitHub auto", "Historique des logs", "Support prioritaire"],
-    highlighted: true,
-  },
-  {
-    name: "Agence",
-    price: "$149",
-    period: "/setup",
-    desc: "Pour créer des stacks client",
-    features: ["Tout le plan Pro", "Mode agence", "Facturation client intégrée", "White-label disponible", "Onboarding dédié"],
-    highlighted: false,
-  },
-];
-
-function DemoMockup() {
+function DemoMockup({ lang }: { lang: Lang }) {
+  const tr = t[lang].demo;
   return (
     <div className="relative w-full max-w-2xl mx-auto">
       <div className="absolute inset-0 bg-violet-600/20 blur-3xl rounded-3xl" />
@@ -79,14 +66,14 @@ function DemoMockup() {
         </div>
         <div className="p-6 space-y-4">
           <div>
-            <p className="text-xs text-muted-foreground mb-1">Nom du projet</p>
+            <p className="text-xs text-muted-foreground mb-1">Project name</p>
             <div className="h-10 rounded-lg border border-violet-500/40 bg-violet-600/5 px-3 flex items-center">
               <span className="text-sm font-mono text-violet-300">my-saas-2024</span>
               <span className="ml-0.5 w-0.5 h-4 bg-violet-400 animate-pulse" />
             </div>
           </div>
           <div>
-            <p className="text-xs text-muted-foreground mb-2">Stack : SaaS Standard</p>
+            <p className="text-xs text-muted-foreground mb-2">Stack: SaaS Standard</p>
             <div className="flex gap-2 flex-wrap">
               {["Vercel", "Supabase", "Stripe", "Resend", "GitHub"].map((s) => (
                 <span key={s} className="px-2.5 py-1 rounded-lg bg-violet-600/15 border border-violet-600/30 text-violet-300 text-xs font-medium">{s}</span>
@@ -105,15 +92,15 @@ function DemoMockup() {
                 <div className={`w-2 h-2 rounded-full ${step.status === "done" ? "bg-emerald-500" : step.status === "active" ? "bg-violet-500 animate-pulse" : "bg-zinc-600"}`} />
                 <span className="text-xs text-muted-foreground flex-1">{step.name}</span>
                 <span className="text-xs">
-                  {step.status === "done" && <span className="text-emerald-400">✓ Créé</span>}
-                  {step.status === "active" && <span className="text-violet-400">En cours...</span>}
-                  {step.status === "pending" && <span className="text-muted-foreground">En attente</span>}
+                  {step.status === "done" && <span className="text-emerald-400">✓ {tr.step1}</span>}
+                  {step.status === "active" && <span className="text-violet-400">{tr.step2}</span>}
+                  {step.status === "pending" && <span className="text-muted-foreground">{tr.step3}</span>}
                 </span>
               </div>
             ))}
           </div>
           <div className="rounded-lg bg-[#0a0a0a] border border-white/5 p-3">
-            <p className="text-xs text-muted-foreground mb-2">.env généré</p>
+            <p className="text-xs text-muted-foreground mb-2">{tr.envTitle}</p>
             <div className="font-mono text-xs space-y-0.5">
               <p><span className="text-muted-foreground">VERCEL_PROJECT_ID</span>=<span className="text-violet-400 blur-[2px]">prj_xxxxx</span></p>
               <p><span className="text-muted-foreground">SUPABASE_URL</span>=<span className="text-emerald-400 blur-[2px]">https://xxx.supabase.co</span></p>
@@ -127,6 +114,10 @@ function DemoMockup() {
 }
 
 export default function LandingPage() {
+  const [lang, setLang] = useState<Lang>("en");
+  const { isSignedIn, isLoaded } = useAuth();
+  const tr = t[lang];
+
   return (
     <div className="min-h-screen bg-mesh text-foreground">
       {/* Navbar */}
@@ -139,11 +130,33 @@ export default function LandingPage() {
             <span className="font-bold text-lg">StackLaunch</span>
           </div>
           <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Fonctionnalités</a>
-            <a href="#how" className="hover:text-foreground transition-colors">Comment ça marche</a>
-            <a href="#pricing" className="hover:text-foreground transition-colors">Tarifs</a>
+            <a href="#features" className="hover:text-foreground transition-colors">{tr.nav.features}</a>
+            <a href="#how" className="hover:text-foreground transition-colors">{tr.nav.how}</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">{tr.nav.pricing}</a>
           </div>
-          <NavAuthButtons />
+          <div className="flex items-center gap-3">
+            <LangToggle lang={lang} setLang={setLang} />
+            {!isLoaded ? (
+              <div className="w-24 h-9 rounded-lg skeleton" />
+            ) : isSignedIn ? (
+              <Link href="/dashboard">
+                <Button variant="violet" size="sm" className="gap-1.5">
+                  {tr.nav.dashboard} <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link href="/sign-in">
+                  <Button variant="ghost" size="sm">{tr.nav.signIn}</Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button variant="violet" size="sm" className="gap-1.5">
+                    {tr.nav.getStarted} <ArrowRight className="w-3.5 h-3.5" />
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -153,25 +166,47 @@ export default function LandingPage() {
           <div className="text-center mb-16">
             <Badge variant="violet" className="mb-6 px-4 py-1.5 text-sm gap-2">
               <Star className="w-3.5 h-3.5" fill="currentColor" />
-              Priorité 1 : Vercel · Supabase · Stripe · Resend · GitHub
+              {tr.hero.badge}
             </Badge>
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.08]">
-              Lance ton SaaS en{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-violet-600">1 clic</span>
-              ,<br />pas en 2 jours
+              {tr.hero.title1}{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-violet-600">
+                {tr.hero.titleAccent}
+              </span>
+              ,<br />{tr.hero.title2}
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-              Connecte Vercel, Supabase, Stripe et 20+ services{" "}
-              <span className="text-foreground font-medium">une seule fois</span>. On crée automatiquement tous tes projets, injecte les env vars et configure les webhooks.
+              {tr.hero.subtitle.split(tr.hero.subtitleBold)[0]}
+              <span className="text-foreground font-medium">{tr.hero.subtitleBold}</span>
+              {tr.hero.subtitle.split(tr.hero.subtitleBold)[1]}
             </p>
-            <HeroCTA />
-            <p className="text-sm text-muted-foreground mt-4">
-              Gratuit pour 1 projet · Pas de CB requise · Setup en 2 minutes
-            </p>
+            <div className="flex items-center justify-center gap-4 flex-wrap">
+              {isSignedIn ? (
+                <Link href="/dashboard">
+                  <Button variant="violet" size="xl" className="gap-2 shadow-2xl shadow-violet-900/40">
+                    <Zap className="w-5 h-5" fill="currentColor" />
+                    {tr.hero.ctaDashboard}
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/sign-up">
+                  <Button variant="violet" size="xl" className="gap-2 shadow-2xl shadow-violet-900/40">
+                    <Zap className="w-5 h-5" fill="currentColor" />
+                    {tr.hero.cta}
+                  </Button>
+                </Link>
+              )}
+              <a href="#how">
+                <Button variant="outline" size="xl" className="gap-2">
+                  {tr.hero.ctaHow} <ChevronRight className="w-5 h-5" />
+                </Button>
+              </a>
+            </div>
+            <p className="text-sm text-muted-foreground mt-4">{tr.hero.subCta}</p>
           </div>
-          <DemoMockup />
+          <DemoMockup lang={lang} />
           <div className="mt-16 text-center">
-            <p className="text-sm text-muted-foreground mb-4">Compatible avec 20+ services</p>
+            <p className="text-sm text-muted-foreground mb-4">{tr.hero.servicesLabel}</p>
             <div className="flex flex-wrap justify-center gap-2">
               {SERVICES.map((s) => (
                 <span key={s.name} className={`px-3 py-1.5 rounded-lg border border-white/5 text-sm font-medium ${s.bg} ${s.color}`}>
@@ -186,14 +221,10 @@ export default function LandingPage() {
       {/* Problem */}
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <Badge variant="destructive" className="mb-4">Le problème</Badge>
-          <h2 className="text-3xl font-bold mb-6">2-3 heures perdues à chaque nouveau projet</h2>
+          <Badge variant="destructive" className="mb-4">{tr.problem.badge}</Badge>
+          <h2 className="text-3xl font-bold mb-6">{tr.problem.title}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
-            {[
-              { emoji: "😤", title: "Aller sur Vercel", desc: "Créer un projet, récupérer le token, l'org ID..." },
-              { emoji: "😩", title: "Aller sur Supabase", desc: "Créer un projet, attendre 2 min, copier 3 clés..." },
-              { emoji: "🤯", title: "Configurer Stripe", desc: "Créer les webhooks, récupérer les secrets, tester..." },
-            ].map((item) => (
+            {tr.problem.items.map((item) => (
               <Card key={item.title} className="glass border-red-500/10 bg-red-500/5">
                 <CardContent className="p-5">
                   <span className="text-3xl mb-3 block">{item.emoji}</span>
@@ -205,8 +236,8 @@ export default function LandingPage() {
           </div>
           <div className="mt-8 p-6 rounded-2xl border border-red-500/15 bg-red-500/5">
             <p className="text-muted-foreground">
-              Et ensuite : copier-coller manuellement dans le .env, oublier une clé, redémarrer le serveur, recommencer...
-              <span className="text-red-400 font-semibold"> Chaque nouveau projet. À chaque fois.</span>
+              {tr.problem.footer}
+              <span className="text-red-400 font-semibold">{tr.problem.footerBold}</span>
             </p>
           </div>
         </div>
@@ -216,13 +247,13 @@ export default function LandingPage() {
       <section id="how" className="py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <Badge variant="violet" className="mb-4">Comment ça marche</Badge>
-            <h2 className="text-3xl font-bold">4 étapes, c'est tout</h2>
+            <Badge variant="violet" className="mb-4">{tr.how.badge}</Badge>
+            <h2 className="text-3xl font-bold">{tr.how.title}</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {STEPS.map((step, i) => (
+            {tr.how.steps.map((step, i) => (
               <div key={step.num} className="relative">
-                {i < STEPS.length - 1 && (
+                {i < tr.how.steps.length - 1 && (
                   <div className="hidden md:block absolute top-6 left-full w-full h-px bg-gradient-to-r from-violet-600/30 to-transparent" />
                 )}
                 <div className="text-4xl font-black text-violet-600/30 mb-3">{step.num}</div>
@@ -238,21 +269,24 @@ export default function LandingPage() {
       <section id="features" className="py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <Badge variant="violet" className="mb-4">Fonctionnalités</Badge>
-            <h2 className="text-3xl font-bold">Tout ce dont tu as besoin</h2>
+            <Badge variant="violet" className="mb-4">{tr.features.badge}</Badge>
+            <h2 className="text-3xl font-bold">{tr.features.title}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {FEATURES.map((f) => (
-              <Card key={f.title} className="glass hover:border-violet-600/20 transition-colors">
-                <CardContent className="p-6">
-                  <div className="w-10 h-10 rounded-xl bg-violet-600/15 border border-violet-600/20 flex items-center justify-center mb-4">
-                    <f.icon className="w-5 h-5 text-violet-400" />
-                  </div>
-                  <h3 className="font-semibold mb-2">{f.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
+            {tr.features.items.map((f, i) => {
+              const Icon = FEATURE_ICONS[i];
+              return (
+                <Card key={f.title} className="glass hover:border-violet-600/20 transition-colors">
+                  <CardContent className="p-6">
+                    <div className="w-10 h-10 rounded-xl bg-violet-600/15 border border-violet-600/20 flex items-center justify-center mb-4">
+                      <Icon className="w-5 h-5 text-violet-400" />
+                    </div>
+                    <h3 className="font-semibold mb-2">{f.title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -261,44 +295,46 @@ export default function LandingPage() {
       <section id="pricing" className="py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <Badge variant="violet" className="mb-4">Tarifs</Badge>
-            <h2 className="text-3xl font-bold">Simple et transparent</h2>
+            <Badge variant="violet" className="mb-4">{tr.pricing.badge}</Badge>
+            <h2 className="text-3xl font-bold">{tr.pricing.title}</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PLANS.map((plan) => (
-              <Card key={plan.name} className={plan.highlighted ? "glass border-violet-500/40 shadow-2xl shadow-violet-900/20 relative" : "glass"}>
-                {plan.highlighted && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge variant="violet" className="shadow-lg">Recommandé</Badge>
-                  </div>
-                )}
-                <CardContent className="p-6">
-                  <div className="mb-6">
-                    <h3 className="font-bold text-lg mb-1">{plan.name}</h3>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-black">{plan.price}</span>
-                      <span className="text-muted-foreground text-sm">{plan.period}</span>
+            {tr.pricing.plans.map((plan, i) => {
+              const highlighted = i === 1;
+              return (
+                <Card key={plan.name} className={highlighted ? "glass border-violet-500/40 shadow-2xl shadow-violet-900/20 relative" : "glass"}>
+                  {highlighted && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <Badge variant="violet" className="shadow-lg">{tr.pricing.recommended}</Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">{plan.desc}</p>
-                  </div>
-                  <Separator className="mb-6" />
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-sm">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  {/* Client component handles auth state */}
-                  <Link href={plan.highlighted ? "/sign-up" : "/sign-up"}>
-                    <Button variant={plan.highlighted ? "violet" : "outline"} className="w-full">
-                      {plan.highlighted ? "Démarrer en Pro" : plan.name === "Free" ? "Commencer gratuitement" : "Contacter les ventes"}
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
+                  )}
+                  <CardContent className="p-6">
+                    <div className="mb-6">
+                      <h3 className="font-bold text-lg mb-1">{plan.name}</h3>
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-black">{plan.price}</span>
+                        <span className="text-muted-foreground text-sm">{plan.period}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">{plan.desc}</p>
+                    </div>
+                    <Separator className="mb-6" />
+                    <ul className="space-y-3 mb-8">
+                      {plan.features.map((f) => (
+                        <li key={f} className="flex items-center gap-2 text-sm">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link href="/sign-up">
+                      <Button variant={highlighted ? "violet" : "outline"} className="w-full">
+                        {plan.cta}
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -307,11 +343,23 @@ export default function LandingPage() {
       <section className="py-24 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <div className="p-12 rounded-3xl border border-violet-600/20 bg-violet-600/5 glow-purple">
-            <h2 className="text-4xl font-bold mb-4">Prêt à gagner 2h par projet ?</h2>
-            <p className="text-muted-foreground mb-8 text-lg">
-              Rejoins les fondateurs qui utilisent StackLaunch pour lancer plus vite.
-            </p>
-            <FinalCTA />
+            <h2 className="text-4xl font-bold mb-4">{tr.finalCta.title}</h2>
+            <p className="text-muted-foreground mb-8 text-lg">{tr.finalCta.subtitle}</p>
+            {isSignedIn ? (
+              <Link href="/new-project">
+                <Button variant="violet" size="xl" className="gap-2 shadow-2xl shadow-violet-900/40">
+                  <Zap className="w-5 h-5" fill="currentColor" />
+                  {tr.finalCta.ctaDashboard}
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/sign-up">
+                <Button variant="violet" size="xl" className="gap-2 shadow-2xl shadow-violet-900/40">
+                  <Zap className="w-5 h-5" fill="currentColor" />
+                  {tr.finalCta.cta}
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -325,11 +373,11 @@ export default function LandingPage() {
             </div>
             <span className="font-bold">StackLaunch</span>
           </div>
-          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} StackLaunch. Fait avec ⚡ pour les fondateurs.</p>
+          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} StackLaunch. {tr.footer.tagline}</p>
           <div className="flex gap-6 text-sm text-muted-foreground">
-            <a href="#" className="hover:text-foreground transition-colors">Confidentialité</a>
-            <a href="#" className="hover:text-foreground transition-colors">CGU</a>
-            <a href="#" className="hover:text-foreground transition-colors">Contact</a>
+            <a href="#" className="hover:text-foreground transition-colors">{tr.footer.privacy}</a>
+            <a href="#" className="hover:text-foreground transition-colors">{tr.footer.terms}</a>
+            <a href="#" className="hover:text-foreground transition-colors">{tr.footer.contact}</a>
           </div>
         </div>
       </footer>

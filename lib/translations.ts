@@ -1,0 +1,218 @@
+export type Lang = "en" | "fr";
+
+export const t = {
+  en: {
+    nav: {
+      features: "Features",
+      how: "How it works",
+      pricing: "Pricing",
+      signIn: "Sign in",
+      getStarted: "Get started",
+      dashboard: "Dashboard",
+    },
+    hero: {
+      badge: "Priority 1: Vercel · Supabase · Stripe · Resend · GitHub",
+      title1: "Launch your SaaS in",
+      titleAccent: "1 click",
+      title2: "not 2 days",
+      subtitle:
+        "Connect Vercel, Supabase, Stripe and 20+ services just once. We automatically create all your projects, inject env vars and configure webhooks.",
+      subtitleBold: "just once",
+      cta: "Start for free",
+      ctaDashboard: "Go to dashboard",
+      ctaHow: "See how it works",
+      subCta: "Free for 1 project · No credit card · 2-minute setup",
+      servicesLabel: "Compatible with 20+ services",
+    },
+    demo: {
+      step1: "Created",
+      step2: "In progress...",
+      step3: "Waiting",
+      envTitle: ".env generated",
+    },
+    problem: {
+      badge: "The problem",
+      title: "2–3 hours wasted on every new project",
+      items: [
+        { emoji: "😤", title: "Go to Vercel", desc: "Create a project, get the token, the org ID..." },
+        { emoji: "😩", title: "Go to Supabase", desc: "Create a project, wait 2 min, copy 3 keys..." },
+        { emoji: "🤯", title: "Configure Stripe", desc: "Create webhooks, grab secrets, test them..." },
+      ],
+      footer:
+        "Then: manually copy-paste into .env, forget a key, restart the server, start over...",
+      footerBold: " Every new project. Every single time.",
+    },
+    how: {
+      badge: "How it works",
+      title: "4 steps, that's it",
+      steps: [
+        { num: "01", title: "Connect your accounts", desc: "OAuth or API key — once and for all." },
+        { num: "02", title: "Name your project", desc: "That's all we ask." },
+        { num: "03", title: "We create everything", desc: "Repos, databases, webhooks, env vars — automatically." },
+        { num: "04", title: "Grab your .env", desc: "Encrypted, ready to paste into Claude Code or your IDE." },
+      ],
+    },
+    features: {
+      badge: "Features",
+      title: "Everything you need",
+      items: [
+        { title: "1-click creation", desc: "No more copy-pasting across 10 dashboards. Everything is wired automatically." },
+        { title: "AES-256 encryption", desc: "Your tokens are never in plain text. Server-side GCM encryption, reveal on demand." },
+        { title: "Automatic linking", desc: "Supabase injected into Vercel, Stripe webhook configured, GitHub connected to deploy." },
+        { title: ".env ready for Claude Code", desc: "Paste directly into your project. Works with Claude Code, Cursor, Windsurf." },
+        { title: "2h → 2 minutes", desc: "What used to take half a day gets done over a coffee." },
+        { title: "Boilerplate included", desc: "GitHub repo created, README and .gitignore pushed, Vercel auto-deploy enabled." },
+      ],
+    },
+    pricing: {
+      badge: "Pricing",
+      title: "Simple and transparent",
+      plans: [
+        {
+          name: "Free",
+          price: "$0",
+          period: "/forever",
+          desc: "To try StackLaunch",
+          cta: "Start for free",
+          features: ["1 project", "Up to 5 services", ".env export", "Encryption included"],
+        },
+        {
+          name: "Pro",
+          price: "$29",
+          period: "/month",
+          desc: "For serious founders",
+          cta: "Start Pro",
+          features: ["Unlimited projects", "All services", "Auto GitHub sync", "Action logs", "Priority support"],
+        },
+        {
+          name: "Agency",
+          price: "$149",
+          period: "/setup",
+          desc: "Create stacks for clients",
+          cta: "Contact sales",
+          features: ["Everything in Pro", "Agency mode", "Built-in client billing", "White-label available", "Dedicated onboarding"],
+        },
+      ],
+      recommended: "Recommended",
+    },
+    finalCta: {
+      title: "Ready to save 2h per project?",
+      subtitle: "Join the founders using StackLaunch to ship faster.",
+      cta: "Start for free",
+      ctaDashboard: "Create my first project",
+    },
+    footer: {
+      tagline: "Built with ⚡ for founders.",
+      privacy: "Privacy",
+      terms: "Terms",
+      contact: "Contact",
+    },
+  },
+  fr: {
+    nav: {
+      features: "Fonctionnalités",
+      how: "Comment ça marche",
+      pricing: "Tarifs",
+      signIn: "Se connecter",
+      getStarted: "Commencer",
+      dashboard: "Dashboard",
+    },
+    hero: {
+      badge: "Priorité 1 : Vercel · Supabase · Stripe · Resend · GitHub",
+      title1: "Lance ton SaaS en",
+      titleAccent: "1 clic",
+      title2: "pas en 2 jours",
+      subtitle:
+        "Connecte Vercel, Supabase, Stripe et 20+ services une seule fois. On crée automatiquement tous tes projets, injecte les env vars et configure les webhooks.",
+      subtitleBold: "une seule fois",
+      cta: "Commencer gratuitement",
+      ctaDashboard: "Aller au dashboard",
+      ctaHow: "Voir comment ça marche",
+      subCta: "Gratuit pour 1 projet · Pas de CB · Setup en 2 minutes",
+      servicesLabel: "Compatible avec 20+ services",
+    },
+    demo: {
+      step1: "Créé",
+      step2: "En cours...",
+      step3: "En attente",
+      envTitle: ".env généré",
+    },
+    problem: {
+      badge: "Le problème",
+      title: "2–3 heures perdues à chaque nouveau projet",
+      items: [
+        { emoji: "😤", title: "Aller sur Vercel", desc: "Créer un projet, récupérer le token, l'org ID..." },
+        { emoji: "😩", title: "Aller sur Supabase", desc: "Créer un projet, attendre 2 min, copier 3 clés..." },
+        { emoji: "🤯", title: "Configurer Stripe", desc: "Créer les webhooks, récupérer les secrets, tester..." },
+      ],
+      footer:
+        "Et ensuite : copier-coller manuellement dans le .env, oublier une clé, redémarrer le serveur, recommencer...",
+      footerBold: " Chaque nouveau projet. À chaque fois.",
+    },
+    how: {
+      badge: "Comment ça marche",
+      title: "4 étapes, c'est tout",
+      steps: [
+        { num: "01", title: "Connecte tes comptes", desc: "OAuth ou API key — une fois pour toutes." },
+        { num: "02", title: "Donne un nom au projet", desc: "C'est tout ce qu'on te demande." },
+        { num: "03", title: "On crée tout", desc: "Repos, bases de données, webhooks, env vars — automatiquement." },
+        { num: "04", title: "Récupère ton .env", desc: "Chiffré, prêt à coller dans Claude Code ou ton IDE." },
+      ],
+    },
+    features: {
+      badge: "Fonctionnalités",
+      title: "Tout ce dont tu as besoin",
+      items: [
+        { title: "Création 1-clic", desc: "Plus jamais de copier-coller entre 10 dashboards. Tout est wired automatiquement." },
+        { title: "Chiffrement AES-256", desc: "Tes tokens ne sont jamais en clair. Chiffrement GCM côté serveur, révélation à la demande." },
+        { title: "Liens automatiques", desc: "Supabase injecté dans Vercel, webhook Stripe configuré, GitHub connecté au déploiement." },
+        { title: ".env prêt pour Claude Code", desc: "Copie-colle directement dans ton projet. Compatible Claude Code, Cursor, Windsurf." },
+        { title: "2h → 2 minutes", desc: "Ce qui prenait une demi-journée se fait pendant un café." },
+        { title: "Boilerplate inclus", desc: "Repo GitHub créé, README et .gitignore poussés, auto-deploy Vercel activé." },
+      ],
+    },
+    pricing: {
+      badge: "Tarifs",
+      title: "Simple et transparent",
+      plans: [
+        {
+          name: "Free",
+          price: "$0",
+          period: "/toujours",
+          desc: "Pour tester StackLaunch",
+          cta: "Commencer gratuitement",
+          features: ["1 projet", "5 services max", "Export .env", "Chiffrement inclus"],
+        },
+        {
+          name: "Pro",
+          price: "$29",
+          period: "/mois",
+          desc: "Pour les fondateurs sérieux",
+          cta: "Démarrer en Pro",
+          features: ["Projets illimités", "Tous les services", "Sync GitHub auto", "Historique des logs", "Support prioritaire"],
+        },
+        {
+          name: "Agence",
+          price: "$149",
+          period: "/setup",
+          desc: "Pour créer des stacks client",
+          cta: "Contacter les ventes",
+          features: ["Tout le plan Pro", "Mode agence", "Facturation client intégrée", "White-label disponible", "Onboarding dédié"],
+        },
+      ],
+      recommended: "Recommandé",
+    },
+    finalCta: {
+      title: "Prêt à gagner 2h par projet ?",
+      subtitle: "Rejoins les fondateurs qui utilisent StackLaunch pour lancer plus vite.",
+      cta: "Commencer gratuitement",
+      ctaDashboard: "Créer mon premier projet",
+    },
+    footer: {
+      tagline: "Fait avec ⚡ pour les fondateurs.",
+      privacy: "Confidentialité",
+      terms: "CGU",
+      contact: "Contact",
+    },
+  },
+};
